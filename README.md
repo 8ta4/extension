@@ -23,21 +23,34 @@ brew install extension
 
 > How do I use this `extension` command?
 
-Just specify the name of the Chromium-based browser, the ID of the extension you want to install, and optionally, the path to a configuration script, like this:
+Well, let me give you an example. Say you want to install the Video Speed Controller extension on Chrome. You'd use this command:
 
 ```sh
-extension browser extensionId path/to/configScript.js
+extension chrome nffaoalbilbmmfgbnbgppjihopabppdk
 ```
 
-- `browser` is the name of the Chromium-based browser you want to manage extensions for.
-- `extensionId` is the ID of the extension you want to install. You can find this ID on the Chrome Web Store page for the extension.
-- `configFilePath` (optional) is the path to a JavaScript file that contains the configuration script for the extension. If you skip this argument, `extension` will just install the extension without configuring it.
+Here, `chrome` is the browser you want to manage extensions for and `nffaoalbilbmmfgbnbgppjihopabppdk` is the ID of the Video Speed Controller extension.
 
-`extension` works by using UI automation. Just a heads up, try not to mess with it while it's running, like clicking around or having system notifications pop up.
+The `extension` command works by using UI automation. Just a heads up, try not to mess with it while it's running, like clicking around or having system notifications pop up.
 
-> What is a configuration script?
+> How can I configure the `extension` command to modify settings of the Video Speed Controller extension?
 
-A configuration script is a JavaScript file used to set up an extension. These scripts are designed to be idempotent, meaning they can be run multiple times without causing any unintended changes to your system.
+You can do that by providing a path to a script that modifies the desired settings of the extension. For instance, if you wish to enable the `Work on audio` option in the Video Speed Controller extension, your command might look like this:
+
+```sh
+extension chrome nffaoalbilbmmfgbnbgppjihopabppdk configScript.js
+```
+
+The `configScript.js` file should contain JavaScript code that sets the `audioBoolean` to `true`, which corresponds to the `Work on audio` feature.
+
+The JavaScript code in `configScript.js` would look like this:
+
+```javascript
+// configScript.js
+chrome.storage.sync.set({audioBoolean: true});
+```
+
+These scripts are designed to be idempotent, meaning they can be run multiple times without causing any unintended changes to your system.
 
 > What happens if the extension is already installed?
 

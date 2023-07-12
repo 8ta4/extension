@@ -31,7 +31,11 @@ extension chrome nffaoalbilbmmfgbnbgppjihopabppdk
 
 Here, `chrome` is the browser you want to manage extensions for and `nffaoalbilbmmfgbnbgppjihopabppdk` is the ID of the Video Speed Controller extension.
 
-The `extension` command works by using UI automation. Just a heads up, try not to mess with it while it's running, like clicking around or having system notifications pop up.
+Just a heads up, try not to click around or have system notifications pop up while it's running.
+
+> Why should I avoid interfering with `extension` while it's running?
+
+The `extension` command works through UI automation. Any user interactions or system notifications could disrupt its operation, leading to unexpected results or errors.
 
 > What should I do if `extension` prompts for permissions?
 

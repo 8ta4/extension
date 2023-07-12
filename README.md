@@ -35,7 +35,7 @@ Just a heads up, try not to click around or have system notifications pop up whi
 
 > Why should I avoid interfering with `extension` while it's running?
 
-The `extension` command works through UI automation. Any user interactions or system notifications could disrupt its operation, leading to unexpected results or errors.
+The `extension` command works through UI automation. Any user interactions or system notifications could disrupt its operation, leading to unexpected results or errors. This UI automation process is also why `extension` might ask for permissions.
 
 > What should I do if `extension` prompts for permissions?
 

@@ -45,14 +45,14 @@ If the extension is already installed, `extension` will just apply the configura
 
 ## Limitations
 
-> Can I use `extension` on operating systems other than macOS?
+> Can I use `extension` on all operating systems?
 
-No, `extension` only supports macOS.
+No. Currently, `extension` only supports macOS.
 
 > Does `extension` require any specific permissions to work?
 
-Yes, `extension` requires access to `System Settings > Privacy & Security > Accessibility`. But the specific permissions it needs could change as macOS updates.
+Yes. `extension` requires access to `System Settings > Privacy & Security > Accessibility`. But the specific permissions it needs could change as macOS updates.
 
 > Is `extension` compatible with all browsers?
 
-No. At the moment, `extension` supports Chrome and Edge. While it could theoretically support other Chromium-based browsers, only Chrome and Edge have been tested. `extension` doesn't currently support non-Chromium browsers like Firefox or Safari.
+No. Currently, `extension` supports Chrome and Edge. While it could theoretically support other Chromium-based browsers, only Chrome and Edge have been tested. `extension` doesn't currently support non-Chromium browsers like Firefox or Safari.

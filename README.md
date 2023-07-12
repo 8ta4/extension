@@ -10,9 +10,9 @@ It extends your life span by 10 seconds with its automatic installation and conf
 
 > How do I install this tool?
 
-First off, you need Homebrew. If it's not already installed, you can find the instructions on the [Homebrew website](https://brew.sh/).
+First off, you need Homebrew. If you don't have it already, you can find the instructions on the [Homebrew website](https://brew.sh/).
 
-Once you've got Homebrew, installing `extension` is as simple as entering these commands in your terminal:
+Once you've got Homebrew, just enter these commands in your terminal:
 
 ```sh
 brew tap 8ta4/extension
@@ -47,12 +47,12 @@ If the extension is already installed, `extension` will just apply the configura
 
 > Can I use `extension` on operating systems other than macOS?
 
-No, currently `extension` only supports macOS.
+No, `extension` only supports macOS.
 
 > Does `extension` require any specific permissions to work?
 
-Yes, `extension` requires access to `System Settings > Privacy & Security > Accessibility`. However, the specific permissions it needs could change as macOS updates.
+Yes, `extension` requires access to `System Settings > Privacy & Security > Accessibility`. But the specific permissions it needs could change as macOS updates.
 
 > Is `extension` compatible with all browsers?
 
-No, at present, `extension` supports Chrome and Edge. While it theoretically could support other Chromium-based browsers, only Chrome and Edge have been tested. `extension` does not currently support non-Chromium browsers such as Firefox or Safari.
+No. At the moment, `extension` supports Chrome and Edge. While it could theoretically support other Chromium-based browsers, only Chrome and Edge have been tested. `extension` doesn't currently support non-Chromium browsers like Firefox or Safari.

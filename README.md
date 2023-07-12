@@ -29,28 +29,30 @@ Just specify the name of the Chromium-based browser, the ID of the extension you
 extension browser extensionId path/to/configScript.js
 ```
 
-If the extension is already installed, `extension` will just apply the configuration script.
-
-## Command Line Arguments
-
-> Can you explain these command line arguments?
-
 - `browser` is the name of the Chromium-based browser you want to manage extensions for.
 - `extensionId` is the ID of the extension you want to install. You can find this ID on the Chrome Web Store page for the extension.
 - `configFilePath` (optional) is the path to a JavaScript file that contains the configuration script for the extension. If you skip this argument, `extension` will just install the extension without configuring it.
 
-## Configuration Scripts
+`extension` operates using UI automation. This means that unexpected events such as user interactions or system notifications could potentially disrupt its operation.
 
-> What's a configuration script?
+> What is a configuration script?
 
-Configuration scripts are JavaScript files that are used to configure an extension. They're designed to be idempotent, which means they can run multiple times without causing any unwanted system changes.
+A configuration script is a JavaScript file used to set up an extension. These scripts are designed to be idempotent, meaning they can be run multiple times without causing any unintended changes to your system.
+
+> What happens if the extension is already installed?
+
+If the extension is already installed, `extension` will just apply the configuration script.
 
 ## Limitations
 
-> Any limitations I should know about?
+> Can I use `extension` on operating systems other than macOS?
 
-At the moment, `extension` is only supported on macOS. It uses UI automation, so any unexpected events like user interactions or system notifications could potentially interfere with its operation.
+No, currently `extension` only supports macOS.
 
-Also, `extension` requires certain permissions to work. When it was created, it needed access to `System Settings > Privacy & Security > Accessibility`. But keep in mind that the specific permissions required may change as macOS evolves.
+> Does `extension` require any specific permissions to work?
 
-In theory, `extension` supports any Chromium-based browser, but only Chrome has been tested. Currently, `extension` doesn't support browsers like Firefox or Safari.
+Yes, `extension` requires access to `System Settings > Privacy & Security > Accessibility`. However, the specific permissions it needs could change as macOS updates.
+
+> Is `extension` compatible with all browsers?
+
+No, at present, `extension` supports Chrome and Edge. While it theoretically could support other Chromium-based browsers, only Chrome and Edge have been tested. `extension` does not currently support non-Chromium browsers such as Firefox or Safari.

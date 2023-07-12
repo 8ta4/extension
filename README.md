@@ -33,7 +33,7 @@ extension browser extensionId path/to/configScript.js
 - `extensionId` is the ID of the extension you want to install. You can find this ID on the Chrome Web Store page for the extension.
 - `configFilePath` (optional) is the path to a JavaScript file that contains the configuration script for the extension. If you skip this argument, `extension` will just install the extension without configuring it.
 
-`extension` operates using UI automation. This means that unexpected events such as user interactions or system notifications could potentially disrupt its operation.
+`extension` works by using UI automation. Just a heads up, try not to mess with it while it's running, like clicking around or having system notifications pop up.
 
 > What is a configuration script?
 

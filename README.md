@@ -33,6 +33,14 @@ Here, `chrome` is the browser you want to manage extensions for and `nffaoalbilb
 
 The `extension` command works by using UI automation. Just a heads up, try not to mess with it while it's running, like clicking around or having system notifications pop up.
 
+> What should I do if `extension` prompts for permissions?
+
+Just follow the prompts to grant access.
+
+> What if I don't get any prompts when running `extension`?
+
+You can manually grant `extension` the required permissions by going to `System Settings > Privacy & Security > Accessibility`.  Just keep in mind that the specific permissions `extension` needs could change as macOS updates.
+
 > How can I configure the `extension` command to modify settings of the Video Speed Controller extension?
 
 You can do that by providing a path to a script that modifies the desired settings of the extension. For instance, if you wish to enable the `Work on audio` option in the Video Speed Controller extension, your command might look like this:
@@ -56,16 +64,18 @@ These scripts are designed to be idempotent, meaning they can be run multiple ti
 
 If the extension is already installed, `extension` will just apply the configuration script.
 
-## Limitations
+> How can I use the `extension` command with Edge?
+
+All you have to do is replace `chrome` with `edge` in the command line argument. For example, if you want to install the Video Speed Controller extension on Edge, your command would look like this:
+
+```sh
+extension edge nffaoalbilbmmfgbnbgppjihopabppdk
+```
+
+> Can I use `extension` with browsers other than Chrome and Edge?
+
+Unfortunately, at the moment, `extension` only supports Chrome and Edge. It doesn't support other Chromium-based browsers or non-Chromium browsers like Firefox or Safari.
 
 > Can I use `extension` on all operating systems?
 
 No. Currently, `extension` only supports macOS.
-
-> Does `extension` require any specific permissions to work?
-
-Yes. `extension` requires access to `System Settings > Privacy & Security > Accessibility`. But the specific permissions it needs could change as macOS updates.
-
-> Is `extension` compatible with all browsers?
-
-No. Currently, `extension` supports Chrome and Edge. While it could theoretically support other Chromium-based browsers, only Chrome and Edge have been tested. `extension` doesn't currently support non-Chromium browsers like Firefox or Safari.

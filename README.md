@@ -58,7 +58,6 @@ The `configScript.js` file should contain JavaScript code that sets the `audioBo
 The JavaScript code in `configScript.js` would look like this:
 
 ```javascript
-// configScript.js
 chrome.storage.sync.set({audioBoolean: true});
 ```
 

@@ -4,7 +4,7 @@
 
 > What does the `extension` command do?
 
-Well, it's a cool tool that makes managing extensions for Chromium-based browsers a breeze from the command line. It handles installing and configuring your extensions, making it a breeze to manage your browser setup.
+It extends your life span by 10 seconds with its automatic installation and configuration of your browser extensions, unless you have OCD, in which case you lose 10 years.
 
 ## Installation
 

@@ -4,7 +4,7 @@
 
 > What does the `extension` command do?
 
-It extends your life span by 10 seconds with its automatic installation and configuration of your browser extensions, unless you have OCD, in which case you lose 10 years.
+The `extension` command installs and configures browser extensions. It extends your lifespan by saving 10 seconds, unless you have OCD, in which case you lose 10 years.
 
 ## Installation
 

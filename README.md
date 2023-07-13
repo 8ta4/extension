@@ -23,7 +23,7 @@ brew install extension
 
 > How do I use this `extension` command?
 
-Well, let me give you an example. Say you want to install the Video Speed Controller extension on Chrome. You'd use this command:
+Well, let me give you an example. Say you want to install the [Video Speed Controller](https://chrome.google.com/webstore/detail/video-speed-controller/nffaoalbilbmmfgbnbgppjihopabppdk) extension on Chrome. You'd use this command:
 
 ```sh
 extension chrome nffaoalbilbmmfgbnbgppjihopabppdk
@@ -44,6 +44,10 @@ Just follow the prompts to grant access.
 > What if I don't get any prompts when running `extension`?
 
 You can manually grant `extension` the required permissions by going to `System Settings > Privacy & Security > Accessibility`.  Just keep in mind that the specific permissions `extension` needs could change as macOS updates.
+
+> How can I find the ID of an extension?
+
+The ID of an extension can usually be found in the extension's URL on the Chrome Web Store. It's that long string of alphanumeric characters at the end of the URL.
 
 > How can I configure the `extension` command to modify settings of the Video Speed Controller extension?
 
@@ -81,4 +85,4 @@ Unfortunately, at the moment, `extension` only supports Chrome and Edge. It does
 
 > Can I use `extension` on all operating systems?
 
-No. Currently, `extension` only supports macOS.
+Nope. Currently, `extension` only supports macOS.

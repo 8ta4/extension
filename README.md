@@ -40,12 +40,12 @@ The ID of an extension can usually be found in the extension's URL on the Chrome
 You can do that by providing a path to a script that modifies the desired settings of the extension. For instance, if you wish to enable the `Work on audio` option in the Video Speed Controller extension, your command might look like this:
 
 ```sh
-extension install chrome nffaoalbilbmmfgbnbgppjihopabppdk configScript.js
+extension install chrome nffaoalbilbmmfgbnbgppjihopabppdk config.js
 ```
 
-The `configScript.js` file should contain JavaScript code that sets the `audioBoolean` to `true`, which corresponds to the `Work on audio` feature.
+The `config.js` file should contain JavaScript code that sets the `audioBoolean` to `true`, which corresponds to the `Work on audio` feature.
 
-The JavaScript code in `configScript.js` would look like this:
+The JavaScript code in `config.js` would look like this:
 
 ```javascript
 chrome.storage.sync.set({audioBoolean: true});
@@ -53,7 +53,7 @@ chrome.storage.sync.set({audioBoolean: true});
 
 These scripts are designed to be idempotent, meaning they can be run multiple times without causing any unintended changes to your system.
 
-> How can I figure out what JavaScript code to write for my `configScript.js` file?
+> How can I figure out what JavaScript code to write for my `config.js` file?
 
 You can use the listen mode of the `extension` command to generate JavaScript code based on changes it detects. For instance, if you want to see what changes the `Work on audio` setting makes to the Video Speed Controller extension, you would use this command:
 
@@ -63,7 +63,7 @@ extension listen chrome nffaoalbilbmmfgbnbgppjihopabppdk
 
 In this command, `listen` is the action, `chrome` is the browser you're targeting, and `nffaoalbilbmmfgbnbgppjihopabppdk` is the ID of the Video Speed Controller extension.
 
-When the `extension` command is in listen mode, it generates JavaScript code based on changes it detects. This code can be used directly or as a reference to modify your `configScript.js` file.
+When the `extension` command is in listen mode, it generates JavaScript code based on changes it detects. This code can be used directly or as a reference to modify your `config.js` file.
 
 > What happens if the extension is already installed?
 

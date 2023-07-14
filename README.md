@@ -31,20 +31,6 @@ extension install chrome nffaoalbilbmmfgbnbgppjihopabppdk
 
 Here, `install` is the action you want to perform, `chrome` is the browser you want to manage extensions for, and `nffaoalbilbmmfgbnbgppjihopabppdk` is the ID of the Video Speed Controller extension.
 
-Just a heads up, try not to click around or have system notifications pop up while it's running.
-
-> Why should I avoid interfering with `extension` while it's running?
-
-The `extension` command works through UI automation. Any user interactions or system notifications could disrupt its operation, leading to unexpected results or errors. This UI automation process is also why `extension` might ask for permissions.
-
-> What should I do if `extension` prompts for permissions?
-
-Just follow the prompts to grant access.
-
-> What if I don't get any prompts when running `extension`?
-
-You can manually grant `extension` the required permissions by going to `System Settings > Privacy & Security > Accessibility`.  Just keep in mind that the specific permissions `extension` needs could change as macOS updates.
-
 > How can I find the ID of an extension?
 
 The ID of an extension can usually be found in the extension's URL on the Chrome Web Store. It's that long string of alphanumeric characters at the end of the URL.

@@ -74,7 +74,7 @@ If the extension is already installed, `extension` will just apply the configura
 All you have to do is replace `chrome` with `edge` in the command line argument. For example, if you want to install the Video Speed Controller extension on Edge, your command would look like this:
 
 ```sh
-extension edge nffaoalbilbmmfgbnbgppjihopabppdk
+extension install edge nffaoalbilbmmfgbnbgppjihopabppdk
 ```
 
 > Can I use `extension` with browsers other than Chrome and Edge?

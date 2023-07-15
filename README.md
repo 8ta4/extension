@@ -58,10 +58,10 @@ These scripts are designed to be idempotent, meaning they can be run multiple ti
 You can use the listen mode of the `extension` command to generate JavaScript code based on changes it detects. For instance, if you want to see what changes the `Work on audio` setting makes to the Video Speed Controller extension, you would use this command:
 
 ```sh
-extension listen chrome nffaoalbilbmmfgbnbgppjihopabppdk
+extension listen chrome
 ```
 
-In this command, `listen` is the action, `chrome` is the browser you're targeting, and `nffaoalbilbmmfgbnbgppjihopabppdk` is the ID of the Video Speed Controller extension.
+In this command, `listen` is the action and `chrome` is the browser you're targeting.
 
 When the `extension` command is in listen mode, it generates JavaScript code based on changes it detects. This code can be used directly or as a reference to modify your `config.js` file.
 

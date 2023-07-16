@@ -2,22 +2,24 @@ module Main where
 
 import Prelude
 
+import Data.Maybe (Maybe)
 import Effect (Effect)
 import Effect.Console (log)
 import Options.Applicative (Parser, ParserInfo, argument, execParser, fullDesc, header, helper, info, progDesc, str, (<**>))
 import Options.Applicative.Builder (metavar)
+import Options.Applicative.Types (optional)
 
 data InstallArgs = InstallArgs
   { browser :: String
   , extensionId :: String
-  , script :: String
+  , script :: Maybe String
   }
 
 installArgs :: Parser InstallArgs
 installArgs = map InstallArgs $ { browser: _, extensionId: _, script: _ }
   <$> argument str (metavar "BROWSER")
   <*> argument str (metavar "EXTENSION_ID")
-  <*> argument str (metavar "SCRIPT")
+  <*> (optional $ argument str (metavar "SCRIPT"))
 
 main :: Effect Unit
 main = installExtension =<< execParser opts

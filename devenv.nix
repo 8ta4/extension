@@ -11,7 +11,7 @@
   scripts.hello.exec = "echo hello from $GREET";
   scripts.run.exec = ''
     command="$@"
-    spago run -w -b "$command"
+    spago run -wb "$command"
   '';
 
   enterShell = ''

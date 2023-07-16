@@ -28,15 +28,17 @@ data InstallArgs = InstallArgs { browser :: Browser, extensionId :: String, scri
 
 data ListenArgs = ListenArgs { browser :: Browser }
 
+browserArg :: Parser Browser
+browserArg = argument (maybeReader readBrowser) (metavar "BROWSER")
+
 installArgs :: Parser InstallArgs
 installArgs = map InstallArgs $ { browser: _, extensionId: _, script: _ }
-  <$> argument (maybeReader readBrowser) (metavar "BROWSER")
+  <$> browserArg
   <*> argument str (metavar "EXTENSION_ID")
   <*> optional (argument str (metavar "SCRIPT"))
 
 listenArgs :: Parser ListenArgs
-listenArgs = map ListenArgs $ { browser: _ }
-  <$> argument (maybeReader readBrowser) (metavar "BROWSER")
+listenArgs = map ListenArgs $ { browser: _ } <$> browserArg
 
 data Args = Install InstallArgs | Listen ListenArgs
 

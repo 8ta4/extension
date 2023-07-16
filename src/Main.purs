@@ -2,8 +2,6 @@ module Main where
 
 import Prelude
 
-import Data.Generic.Rep (class Generic)
-import Data.Show.Generic (genericShow)
 import Effect (Effect)
 import Effect.Console (log)
 import Options.Applicative (Parser, ParserInfo, argument, execParser, fullDesc, header, helper, info, progDesc, str, (<**>))
@@ -14,10 +12,6 @@ data InstallArgs = InstallArgs
   , extensionId :: String
   , script :: String
   }
-
-derive instance genericInstallArgs :: Generic InstallArgs _
-instance showInstallArgs :: Show InstallArgs where
-  show = genericShow
 
 installArgs :: Parser InstallArgs
 installArgs = map InstallArgs $ { browser: _, extensionId: _, script: _ }

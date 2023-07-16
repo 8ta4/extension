@@ -48,7 +48,7 @@ The `config.js` file should contain JavaScript code that sets the `audioBoolean`
 The JavaScript code in `config.js` would look like this:
 
 ```javascript
-chrome.storage.sync.set({audioBoolean: true});
+chrome.storage.sync.set({ audioBoolean: true });
 ```
 
 These scripts are designed to be idempotent, meaning they can be run multiple times without causing any unintended changes to your system.

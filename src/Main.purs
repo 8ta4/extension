@@ -1,7 +1,10 @@
 module Main where
 
 import Prelude
+
+import Data.Generic.Rep (class Generic)
 import Data.Maybe (Maybe(..))
+import Data.Show.Generic (genericShow)
 import Effect (Effect)
 import Effect.Console (log)
 import Options.Applicative (Parser, argument, command, execParser, fullDesc, header, helper, info, maybeReader, progDesc, str, subparser, (<**>))
@@ -10,9 +13,10 @@ import Options.Applicative.Types (optional)
 
 data Browser = Chrome | Edge
 
+derive instance genericBrowser :: Generic Browser _
+
 instance showBrowser :: Show Browser where
-  show Chrome = "chrome"
-  show Edge = "edge"
+  show = genericShow
 
 readBrowser :: String -> Maybe Browser
 readBrowser str = case str of

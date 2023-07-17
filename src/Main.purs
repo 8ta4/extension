@@ -67,7 +67,7 @@ listenExtension (ListenArgs { browser }) = do
   log $ "Listening for changes in extensions for browser " <> (show browser)
   launchAff_ $ runInBrowser "http://localhost:9222"
 
-foreign import runInBrowserImpl :: String -> Effect (Promise Unit)
+foreign import runInBrowserImpl :: forall a. String -> Effect (Promise a)
 
-runInBrowser :: String -> Aff Unit
+runInBrowser :: forall a. String -> Aff a
 runInBrowser = runInBrowserImpl >>> toAffE

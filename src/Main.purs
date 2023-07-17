@@ -60,14 +60,18 @@ main = do
 
 installExtension :: InstallArgs -> Effect Unit
 installExtension (InstallArgs { browser, extensionId, script }) = log $
-  "Installing extension " <> extensionId <> " for browser " <> (show browser) <> " with script " <> show script
+  "Installing extension " <> extensionId <> " for browser " <> show browser <> " with script " <> show script
 
 listenExtension :: ListenArgs -> Effect Unit
 listenExtension (ListenArgs { browser }) = do
-  log $ "Listening for changes in extensions for browser " <> (show browser)
-  launchAff_ $ runInBrowser "http://localhost:9222"
+  log $ "Listening for changes in extensions for browser " <> show browser
+  let browserName = case browser of
+        Chrome -> "Google Chrome"
+        Edge -> "Microsoft Edge"
+  let port = 9222
+  launchAff_ $ runInBrowser ("http://localhost:" <> show port) $ "open -a '" <> browserName <> "' --args --remote-debugging-port=" <> show port
 
-foreign import runInBrowserImpl :: String -> Effect (Promise Unit)
+foreign import runInBrowserImpl :: forall a. String -> String -> Effect (Promise a)
 
-runInBrowser :: String -> Aff Unit
-runInBrowser = runInBrowserImpl >>> toAffE
+runInBrowser :: forall a. String -> String -> Aff a
+runInBrowser endpointURL command = toAffE $ runInBrowserImpl endpointURL command

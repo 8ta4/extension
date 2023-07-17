@@ -65,6 +65,7 @@ installExtension (InstallArgs { browser, extensionId, script }) = log $
 listenExtension :: ListenArgs -> Effect Unit
 listenExtension (ListenArgs { browser }) = do
   log $ "Listening for changes in extensions for browser " <> (show browser)
+  -- https://chromedevtools.github.io/devtools-protocol/#:~:text=as%20protocol%20client-,The%20Developer%20Tools%20front,remote-debugging-port%3D9222,-Then%20you%20can
   launchAff_ $ runInBrowser "http://localhost:9222"
 
 foreign import runInBrowserImpl :: forall a. String -> Effect (Promise a)

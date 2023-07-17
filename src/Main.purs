@@ -60,11 +60,11 @@ main = do
 
 installExtension :: InstallArgs -> Effect Unit
 installExtension (InstallArgs { browser, extensionId, script }) = log $
-  "Installing extension " <> extensionId <> " for browser " <> (show browser) <> " with script " <> show script
+  "Installing extension " <> extensionId <> " for browser " <> show browser <> " with script " <> show script
 
 listenExtension :: ListenArgs -> Effect Unit
 listenExtension (ListenArgs { browser }) = do
-  log $ "Listening for changes in extensions for browser " <> (show browser)
+  log $ "Listening for changes in extensions for browser " <> show browser
   let browserName = case browser of
         Chrome -> "Google Chrome"
         Edge -> "Microsoft Edge"

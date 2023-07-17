@@ -18,6 +18,7 @@ to generate this file without the comments in this block.
   , "js-promise"
   , "js-promise-aff"
   , "maybe"
+  , "node-child-process"
   , "optparse"
   , "prelude"
   ]

@@ -15,9 +15,11 @@ to generate this file without the comments in this block.
   [ "aff"
   , "console"
   , "effect"
+  , "either"
   , "js-promise"
   , "js-promise-aff"
   , "maybe"
+  , "node-child-process"
   , "optparse"
   , "prelude"
   ]

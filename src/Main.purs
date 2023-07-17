@@ -2,11 +2,12 @@ module Main where
 
 import Prelude
 
+import Data.Either (Either(..))
 import Data.Generic.Rep (class Generic)
 import Data.Maybe (Maybe(..))
 import Data.Show.Generic (genericShow)
 import Effect (Effect)
-import Effect.Aff (Aff, launchAff_)
+import Effect.Aff (Aff, Milliseconds(..), delay, launchAff_, try)
 import Effect.Console (log)
 import Node.ChildProcess (defaultSpawnOptions, spawn)
 import Options.Applicative (Parser, argument, command, execParser, fullDesc, header, helper, info, maybeReader, progDesc, str, subparser, (<**>))
@@ -87,4 +88,11 @@ runCommand command args' = do
 runInBrowser :: Aff Unit
 runInBrowser = do
   let endpointURL = "http://localhost:" <> show port
-  toAffE $ runInBrowserImpl endpointURL
+-- This approach ensures that your code will wait for a second and then retry connecting if the initial attempt to connect fails.
+  res <- try $ toAffE $ runInBrowserImpl endpointURL
+  case res of
+    Left _ -> do
+      delay $ Milliseconds 1000.0
+      runInBrowser
+    Right _ -> do
+      pure unit

@@ -7,7 +7,6 @@ import Data.Maybe (Maybe(..))
 import Data.Show.Generic (genericShow)
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff_)
-import Effect.Class (liftEffect)
 import Effect.Console (log)
 import Node.ChildProcess (defaultSpawnOptions, spawn)
 import Options.Applicative (Parser, argument, command, execParser, fullDesc, header, helper, info, maybeReader, progDesc, str, subparser, (<**>))
@@ -70,7 +69,13 @@ port = 9222
 listenExtension :: ListenArgs -> Effect Unit
 listenExtension (ListenArgs { browser }) = do
   log $ "Listening for changes in extensions for browser " <> show browser
-  launchAff_ $ runInBrowser browser
+  let browserName = case browser of
+                        Chrome -> "Google Chrome"
+                        Edge -> "Microsoft Edge"
+  let command = "open"
+  let args' = ["-a", browserName, "--args", "--remote-debugging-port=" <> show port]
+  runCommand command args'
+  launchAff_ $ runInBrowser
 
 foreign import runInBrowserImpl :: forall a. String -> Effect (Promise a)
 
@@ -79,13 +84,7 @@ runCommand command args' = do
   _ <- spawn command args' defaultSpawnOptions
   pure unit
 
-runInBrowser :: Browser -> Aff Unit
-runInBrowser browser = do
-  let browserName = case browser of
-                        Chrome -> "Google Chrome"
-                        Edge -> "Microsoft Edge"
-  let command = "open"
-  let args' = ["-a", browserName, "--args", "--remote-debugging-port=" <> show port]
+runInBrowser :: Aff Unit
+runInBrowser = do
   let endpointURL = "http://localhost:" <> show port
-  liftEffect $ runCommand command args'
   toAffE $ runInBrowserImpl endpointURL

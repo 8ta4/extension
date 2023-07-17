@@ -53,10 +53,10 @@ args = subparser
 
 main :: Effect Unit
 main = do
-  argsMain <- execParser (info (args <**> helper) (fullDesc <> header "extension - Extension Manager"))
-  case argsMain of
-    Install installArgsMain -> installExtension installArgsMain
-    Listen listenArgsMain -> listenExtension listenArgsMain
+  args' <- execParser (info (args <**> helper) (fullDesc <> header "extension - Extension Manager"))
+  case args' of
+    Install installArgs' -> installExtension installArgs'
+    Listen listenArgs' -> listenExtension listenArgs'
 
 installExtension :: InstallArgs -> Effect Unit
 installExtension (InstallArgs { browser, extensionId, script }) = log $

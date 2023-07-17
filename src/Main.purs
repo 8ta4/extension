@@ -6,10 +6,13 @@ import Data.Generic.Rep (class Generic)
 import Data.Maybe (Maybe(..))
 import Data.Show.Generic (genericShow)
 import Effect (Effect)
+import Effect.Aff (Aff, launchAff_)
 import Effect.Console (log)
 import Options.Applicative (Parser, argument, command, execParser, fullDesc, header, helper, info, maybeReader, progDesc, str, subparser, (<**>))
 import Options.Applicative.Builder (metavar)
 import Options.Applicative.Types (optional)
+import Promise (Promise)
+import Promise.Aff (toAffE)
 
 data Browser = Chrome | Edge
 
@@ -60,5 +63,11 @@ installExtension (InstallArgs { browser, extensionId, script }) = log $
   "Installing extension " <> extensionId <> " for browser " <> (show browser) <> " with script " <> show script
 
 listenExtension :: ListenArgs -> Effect Unit
-listenExtension (ListenArgs { browser }) = log $
-  "Listening for changes in extensions for browser " <> (show browser)
+listenExtension (ListenArgs { browser }) = do
+  log $ "Listening for changes in extensions for browser " <> (show browser)
+  launchAff_ $ runInBrowser "http://localhost:9222"
+
+foreign import runInBrowserImpl :: String -> Effect (Promise Unit)
+
+runInBrowser :: String -> Aff Unit
+runInBrowser = runInBrowserImpl >>> toAffE

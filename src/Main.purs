@@ -62,16 +62,18 @@ installExtension :: InstallArgs -> Effect Unit
 installExtension (InstallArgs { browser, extensionId, script }) = log $
   "Installing extension " <> extensionId <> " for browser " <> show browser <> " with script " <> show script
 
+port :: Int
+port = 9222
+
 listenExtension :: ListenArgs -> Effect Unit
 listenExtension (ListenArgs { browser }) = do
   log $ "Listening for changes in extensions for browser " <> show browser
-  let port = 9222
-  launchAff_ $ runInBrowser browser port
+  launchAff_ $ runInBrowser browser
 
 foreign import runInBrowserImpl :: forall a. String -> String -> Effect (Promise a)
 
-runInBrowser :: Browser -> Int -> Aff Unit
-runInBrowser browser port = do
+runInBrowser :: Browser -> Aff Unit
+runInBrowser browser = do
   let browserName = case browser of
                         Chrome -> "Google Chrome"
                         Edge -> "Microsoft Edge"

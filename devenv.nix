@@ -32,6 +32,7 @@
   pre-commit.hooks = {
     nixpkgs-fmt.enable = true;
     prettier.enable = true;
+    purs-tidy.enable = true;
     # https://github.com/cachix/pre-commit-hooks.nix/issues/31#issuecomment-744657870
     trailing-whitespace = {
       enable = true;

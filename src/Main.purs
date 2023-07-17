@@ -70,11 +70,12 @@ port = 9222
 listenExtension :: ListenArgs -> Effect Unit
 listenExtension (ListenArgs { browser }) = do
   log $ "Listening for changes in extensions for browser " <> show browser
-  let browserName = case browser of
-                        Chrome -> "Google Chrome"
-                        Edge -> "Microsoft Edge"
+  let
+    browserName = case browser of
+      Chrome -> "Google Chrome"
+      Edge -> "Microsoft Edge"
   let command = "open"
-  let args' = ["-a", browserName, "--args", "--remote-debugging-port=" <> show port]
+  let args' = [ "-a", browserName, "--args", "--remote-debugging-port=" <> show port ]
   runCommand command args'
   launchAff_ $ runInBrowser
 
@@ -88,7 +89,7 @@ runCommand command args' = do
 runInBrowser :: Aff Unit
 runInBrowser = do
   let endpointURL = "http://localhost:" <> show port
--- This approach ensures that your code will wait for a second and then retry connecting if the initial attempt to connect fails.
+  -- This approach ensures that your code will wait for a second and then retry connecting if the initial attempt to connect fails.
   res <- try $ toAffE $ runInBrowserImpl endpointURL
   case res of
     Left _ -> do

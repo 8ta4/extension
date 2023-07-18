@@ -88,7 +88,7 @@ listenExtension (ListenArgs { browser }) = do
       Edge -> "Microsoft Edge"
   launchAff_ do
     restartBrowser browserName
-    runInBrowser
+    runInBrowser $ show browser <> "://extensions/"
 
 runCommand :: String -> Effect Unit
 runCommand command = do
@@ -102,7 +102,7 @@ quitBrowser browserName = do
 
 openBrowser :: String -> Effect Unit
 openBrowser browserName = do
-  let command = "open -a '" <> browserName <> "'"
+  let command = "open -a '" <> browserName <> "' --args --remote-debugging-port=" <> show port
   runCommand command
 
 waitForBrowserToClose :: String -> Aff Unit
@@ -120,16 +120,16 @@ restartBrowser browserName = do
     waitForBrowserToClose browserName
   liftEffect $ openBrowser browserName
 
-foreign import runInBrowserImpl :: forall a. String -> Effect (Promise a)
+foreign import runInBrowserImpl :: forall a. String -> String -> Effect (Promise a)
 
-runInBrowser :: Aff Unit
-runInBrowser = do
+runInBrowser :: String -> Aff Unit
+runInBrowser url = do
   let endpointURL = "http://localhost:" <> show port
   -- Wait for a second and then retry connecting if the initial attempt to connect fails.
-  res <- try $ toAffE $ runInBrowserImpl endpointURL
+  res <- try $ toAffE $ runInBrowserImpl endpointURL url
   case res of
     Left _ -> do
       delay $ Milliseconds 1000.0
-      runInBrowser
+      runInBrowser url
     Right _ -> do
       pure unit

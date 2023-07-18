@@ -8,8 +8,9 @@ import Data.Maybe (Maybe(..))
 import Data.Show.Generic (genericShow)
 import Effect (Effect)
 import Effect.Aff (Aff, Milliseconds(..), delay, launchAff_, try)
+import Effect.Class (liftEffect)
 import Effect.Console (log)
-import Node.ChildProcess (defaultSpawnOptions, spawn)
+import Node.ChildProcess (defaultExecSyncOptions, execSync)
 import Options.Applicative (Parser, argument, command, execParser, fullDesc, header, helper, info, maybeReader, progDesc, str, subparser, (<**>))
 import Options.Applicative.Builder (metavar)
 import Options.Applicative.Types (optional)
@@ -67,6 +68,16 @@ installExtension (InstallArgs { browser, extensionId, script }) = log $
 port :: Int
 port = 9222
 
+isBrowserRunning :: String -> Effect Boolean
+isBrowserRunning browserName = do
+  let command = "pgrep -x '" <> browserName <> "'"
+  -- pgrep returns an error if it doesn't find any process matching the criteria
+  -- Catch the error and return False indicating that the browser is not running
+  result <- try $ execSync command defaultExecSyncOptions
+  case result of
+    Left _ -> pure false
+    Right _ -> pure true
+
 listenExtension :: ListenArgs -> Effect Unit
 listenExtension (ListenArgs { browser }) = do
   log $ "Listening for changes in extensions for browser " <> show browser
@@ -75,17 +86,41 @@ listenExtension (ListenArgs { browser }) = do
     browserName = case browser of
       Chrome -> "Google Chrome"
       Edge -> "Microsoft Edge"
-  let command = "open"
-  let args' = [ "-a", browserName, "--args", "--remote-debugging-port=" <> show port ]
-  runCommand command args'
-  launchAff_ $ runInBrowser
+  launchAff_ do
+    restartBrowser browserName
+    runInBrowser
+
+runCommand :: String -> Effect Unit
+runCommand command = do
+  _ <- execSync command defaultExecSyncOptions
+  pure unit
+
+quitBrowser :: String -> Effect Unit
+quitBrowser browserName = do
+  let command = "osascript -e 'quit app \"" <> browserName <> "\"'"
+  runCommand command
+
+openBrowser :: String -> Effect Unit
+openBrowser browserName = do
+  let command = "open -a '" <> browserName <> "'"
+  runCommand command
+
+waitForBrowserToClose :: String -> Aff Unit
+waitForBrowserToClose browserName = do
+  running <- liftEffect $ isBrowserRunning browserName
+  when running do
+    delay $ Milliseconds 1000.0
+    waitForBrowserToClose browserName
+
+restartBrowser :: String -> Aff Unit
+restartBrowser browserName = do
+  running <- liftEffect $ isBrowserRunning browserName
+  when running do
+    liftEffect $ quitBrowser browserName
+    waitForBrowserToClose browserName
+  liftEffect $ openBrowser browserName
 
 foreign import runInBrowserImpl :: forall a. String -> Effect (Promise a)
-
-runCommand :: String -> Array String -> Effect Unit
-runCommand command args' = do
-  _ <- spawn command args' defaultSpawnOptions
-  pure unit
 
 runInBrowser :: Aff Unit
 runInBrowser = do

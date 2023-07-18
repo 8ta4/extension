@@ -89,9 +89,14 @@ listenExtension (ListenArgs { browser }) = do
   let url = show browser <> "://extensions/"
   launchAff_ do
     restartBrowser browserName
-    runInBrowser url getAllImpl
+    _ <- runInBrowser url getAllImpl
+    pure unit
 
-foreign import getAllImpl :: Effect Unit
+type ExtensionInfo =
+  { id :: String
+  }
+
+foreign import getAllImpl :: Aff (Array ExtensionInfo)
 
 runCommand :: String -> Effect Unit
 runCommand command = do
@@ -123,9 +128,9 @@ restartBrowser browserName = do
     waitForBrowserToClose browserName
   liftEffect $ openBrowser browserName
 
-foreign import runInBrowserImpl :: forall a. String -> String -> Effect Unit -> Effect (Promise a)
+foreign import runInBrowserImpl :: forall a. String -> String -> Aff a -> Effect (Promise a)
 
-runInBrowser :: forall a. String -> Effect Unit -> Aff a
+runInBrowser :: forall a. String -> Aff a -> Aff a
 runInBrowser url script = do
   let endpointURL = "http://localhost:" <> show port
   -- Wait for a second and then retry connecting if the initial attempt to connect fails.

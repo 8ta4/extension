@@ -11,8 +11,8 @@ export const runInBrowserImpl = (endpointURL) => (url) => (script) => () =>
       const defaultContext = browser.contexts()[0];
       const page = defaultContext.pages()[0];
       await page.goto(url);
-      const all = await page.evaluate(script);
-      resolve(all);
+      const result = await page.evaluate(script);
+      resolve(result);
     } catch (e) {
       reject(e);
     }

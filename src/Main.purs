@@ -89,12 +89,12 @@ listenExtension (ListenArgs { browser }) = do
   runCommand command
   launchAff_ $ runInBrowser
 
-foreign import runInBrowserImpl :: forall a. String -> Effect (Promise a)
-
 runCommand :: String -> Effect Unit
 runCommand command = do
   _ <- execSync command defaultExecSyncOptions
   pure unit
+
+foreign import runInBrowserImpl :: forall a. String -> Effect (Promise a)
 
 runInBrowser :: Aff Unit
 runInBrowser = do

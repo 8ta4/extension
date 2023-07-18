@@ -92,6 +92,7 @@ listenExtension (ListenArgs { browser }) = do
     _ <- runInBrowser url getAllImpl
     pure unit
 
+-- https://developer.chrome.com/docs/extensions/reference/management/#type-ExtensionInfo
 type ExtensionInfo =
   { id :: String
   }

@@ -67,6 +67,16 @@ installExtension (InstallArgs { browser, extensionId, script }) = log $
 port :: Int
 port = 9222
 
+isBrowserRunning :: String -> Effect Boolean
+isBrowserRunning browserName = do
+  let command = "pgrep -x '" <> browserName <> "'"
+  -- pgrep returns an error if it doesn't find any process matching the criteria
+  -- Catch the error and return False indicating that the browser is not running
+  result <- try $ execSync command defaultExecSyncOptions
+  case result of
+    Left _ -> pure false
+    Right _ -> pure true
+
 listenExtension :: ListenArgs -> Effect Unit
 listenExtension (ListenArgs { browser }) = do
   log $ "Listening for changes in extensions for browser " <> show browser

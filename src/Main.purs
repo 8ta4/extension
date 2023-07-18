@@ -8,6 +8,7 @@ import Data.Maybe (Maybe(..))
 import Data.Show.Generic (genericShow)
 import Effect (Effect)
 import Effect.Aff (Aff, Milliseconds(..), delay, launchAff_, try)
+import Effect.Class (liftEffect)
 import Effect.Console (log)
 import Node.ChildProcess (defaultExecSyncOptions, execSync)
 import Options.Applicative (Parser, argument, command, execParser, fullDesc, header, helper, info, maybeReader, progDesc, str, subparser, (<**>))
@@ -85,8 +86,9 @@ listenExtension (ListenArgs { browser }) = do
     browserName = case browser of
       Chrome -> "Google Chrome"
       Edge -> "Microsoft Edge"
-  openBrowser browserName
-  launchAff_ $ runInBrowser
+  launchAff_ do
+    restartBrowser browserName
+    runInBrowser
 
 runCommand :: String -> Effect Unit
 runCommand command = do
@@ -102,6 +104,21 @@ openBrowser :: String -> Effect Unit
 openBrowser browserName = do
   let command = "open -a '" <> browserName <> "'"
   runCommand command
+
+waitForBrowserToClose :: String -> Aff Unit
+waitForBrowserToClose browserName = do
+  running <- liftEffect $ isBrowserRunning browserName
+  when running do
+    delay $ Milliseconds 1000.0
+    waitForBrowserToClose browserName
+
+restartBrowser :: String -> Aff Unit
+restartBrowser browserName = do
+  running <- liftEffect $ isBrowserRunning browserName
+  when running do
+    liftEffect $ quitBrowser browserName
+    waitForBrowserToClose browserName
+  liftEffect $ openBrowser browserName
 
 foreign import runInBrowserImpl :: forall a. String -> Effect (Promise a)
 

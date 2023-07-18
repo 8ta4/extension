@@ -28,7 +28,8 @@ listenExtension (ListenArgs { browser }) = do
   launchAff_ do
     restartBrowser browserName
     extensions <- runInBrowser url getAllImpl
-    let _ = map _.id extensions
+    let ids = map _.id extensions
+    let _ = map (\id -> "chrome-extension://" <> id <> "/manifest.json") ids
     pure unit
 
 restartBrowser :: String -> Aff Unit

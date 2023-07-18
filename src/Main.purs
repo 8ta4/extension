@@ -85,14 +85,23 @@ listenExtension (ListenArgs { browser }) = do
     browserName = case browser of
       Chrome -> "Google Chrome"
       Edge -> "Microsoft Edge"
-  let command = "open -a '" <> browserName <> "' --args --remote-debugging-port= " <> show port
-  runCommand command
+  openBrowser browserName
   launchAff_ $ runInBrowser
 
 runCommand :: String -> Effect Unit
 runCommand command = do
   _ <- execSync command defaultExecSyncOptions
   pure unit
+
+quitBrowser :: String -> Effect Unit
+quitBrowser browserName = do
+  let command = "osascript -e 'quit app \"" <> browserName <> "\"'"
+  runCommand command
+
+openBrowser :: String -> Effect Unit
+openBrowser browserName = do
+  let command = "open -a '" <> browserName <> "'"
+  runCommand command
 
 foreign import runInBrowserImpl :: forall a. String -> Effect (Promise a)
 

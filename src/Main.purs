@@ -86,9 +86,12 @@ listenExtension (ListenArgs { browser }) = do
     browserName = case browser of
       Chrome -> "Google Chrome"
       Edge -> "Microsoft Edge"
+  let url = show browser <> "://extensions/"
   launchAff_ do
     restartBrowser browserName
-    runInBrowser $ show browser <> "://extensions/"
+    runInBrowser url getAllImpl
+
+foreign import getAllImpl :: Effect Unit
 
 runCommand :: String -> Effect Unit
 runCommand command = do
@@ -120,16 +123,17 @@ restartBrowser browserName = do
     waitForBrowserToClose browserName
   liftEffect $ openBrowser browserName
 
-foreign import runInBrowserImpl :: forall a. String -> String -> Effect (Promise a)
+foreign import runInBrowserImpl :: forall a. String -> String -> Effect Unit -> Effect (Promise a)
 
-runInBrowser :: String -> Aff Unit
-runInBrowser url = do
+runInBrowser :: forall a. String -> Effect Unit -> Aff a
+runInBrowser url script = do
   let endpointURL = "http://localhost:" <> show port
   -- Wait for a second and then retry connecting if the initial attempt to connect fails.
-  res <- try $ toAffE $ runInBrowserImpl endpointURL url
+  -- toAffE $ runInBrowserImpl endpointURL url
+  res <- try $ toAffE $ runInBrowserImpl endpointURL url script
   case res of
     Left _ -> do
       delay $ Milliseconds 1000.0
-      runInBrowser url
-    Right _ -> do
-      pure unit
+      runInBrowser url script
+    Right res' -> do
+      pure res'

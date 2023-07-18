@@ -27,7 +27,8 @@ listenExtension (ListenArgs { browser }) = do
   let url = show browser <> "://extensions/"
   launchAff_ do
     restartBrowser browserName
-    _ <- runInBrowser url getAllImpl
+    extensions <- runInBrowser url getAllImpl
+    let _ = map _.id extensions
     pure unit
 
 restartBrowser :: String -> Aff Unit

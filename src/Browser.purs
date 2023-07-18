@@ -16,19 +16,6 @@ installExtension :: InstallArgs -> Effect Unit
 installExtension (InstallArgs { browser, extensionId, script }) = log $
   "Installing extension " <> extensionId <> " for browser " <> show browser <> " with script " <> show script
 
-port :: Int
-port = 9222
-
-isBrowserRunning :: String -> Effect Boolean
-isBrowserRunning browserName = do
-  let command = "pgrep -x '" <> browserName <> "'"
-  -- pgrep returns an error if it doesn't find any process matching the criteria
-  -- Catch the error and return False indicating that the browser is not running
-  result <- try $ execSync command defaultExecSyncOptions
-  case result of
-    Left _ -> pure false
-    Right _ -> pure true
-
 listenExtension :: ListenArgs -> Effect Unit
 listenExtension (ListenArgs { browser }) = do
   log $ "Listening for changes in extensions for browser " <> show browser
@@ -43,30 +30,6 @@ listenExtension (ListenArgs { browser }) = do
     _ <- runInBrowser url getAllImpl
     pure unit
 
-foreign import getAllImpl :: Aff (Array ExtensionInfo)
-
-runCommand :: String -> Effect Unit
-runCommand command = do
-  _ <- execSync command defaultExecSyncOptions
-  pure unit
-
-quitBrowser :: String -> Effect Unit
-quitBrowser browserName = do
-  let command = "osascript -e 'quit app \"" <> browserName <> "\"'"
-  runCommand command
-
-openBrowser :: String -> Effect Unit
-openBrowser browserName = do
-  let command = "open -a '" <> browserName <> "' --args --remote-debugging-port=" <> show port
-  runCommand command
-
-waitForBrowserToClose :: String -> Aff Unit
-waitForBrowserToClose browserName = do
-  running <- liftEffect $ isBrowserRunning browserName
-  when running do
-    delay $ Milliseconds 1000.0
-    waitForBrowserToClose browserName
-
 restartBrowser :: String -> Aff Unit
 restartBrowser browserName = do
   running <- liftEffect $ isBrowserRunning browserName
@@ -75,7 +38,40 @@ restartBrowser browserName = do
     waitForBrowserToClose browserName
   liftEffect $ openBrowser browserName
 
-foreign import runInBrowserImpl :: forall a. String -> String -> Aff a -> Effect (Promise a)
+isBrowserRunning :: String -> Effect Boolean
+isBrowserRunning browserName = do
+  let command = "pgrep -x '" <> browserName <> "'"
+  -- pgrep returns an error if it doesn't find any process matching the criteria
+  -- Catch the error and return False indicating that the browser is not running
+  result <- try $ execSync command defaultExecSyncOptions
+  case result of
+    Left _ -> pure false
+    Right _ -> pure true
+
+quitBrowser :: String -> Effect Unit
+quitBrowser browserName = do
+  let command = "osascript -e 'quit app \"" <> browserName <> "\"'"
+  runCommand command
+
+runCommand :: String -> Effect Unit
+runCommand command = do
+  _ <- execSync command defaultExecSyncOptions
+  pure unit
+
+waitForBrowserToClose :: String -> Aff Unit
+waitForBrowserToClose browserName = do
+  running <- liftEffect $ isBrowserRunning browserName
+  when running do
+    delay $ Milliseconds 1000.0
+    waitForBrowserToClose browserName
+
+openBrowser :: String -> Effect Unit
+openBrowser browserName = do
+  let command = "open -a '" <> browserName <> "' --args --remote-debugging-port=" <> show port
+  runCommand command
+
+port :: Int
+port = 9222
 
 runInBrowser :: forall a. String -> Aff a -> Aff a
 runInBrowser url script = do
@@ -89,3 +85,7 @@ runInBrowser url script = do
       runInBrowser url script
     Right res' -> do
       pure res'
+
+foreign import runInBrowserImpl :: forall a. String -> String -> Aff a -> Effect (Promise a)
+
+foreign import getAllImpl :: Aff (Array ExtensionInfo)

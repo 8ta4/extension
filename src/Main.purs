@@ -102,7 +102,7 @@ quitBrowser browserName = do
 
 openBrowser :: String -> Effect Unit
 openBrowser browserName = do
-  let command = "open -a '" <> browserName <> "'"
+  let command = "open -a '" <> browserName <> "' --args --remote-debugging-port=" <> show port
   runCommand command
 
 waitForBrowserToClose :: String -> Aff Unit

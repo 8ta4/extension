@@ -9,7 +9,7 @@ import Data.Show.Generic (genericShow)
 import Effect (Effect)
 import Effect.Aff (Aff, Milliseconds(..), delay, launchAff_, try)
 import Effect.Console (log)
-import Node.ChildProcess (defaultSpawnOptions, spawn)
+import Node.ChildProcess (defaultExecSyncOptions, execSync)
 import Options.Applicative (Parser, argument, command, execParser, fullDesc, header, helper, info, maybeReader, progDesc, str, subparser, (<**>))
 import Options.Applicative.Builder (metavar)
 import Options.Applicative.Types (optional)
@@ -75,16 +75,15 @@ listenExtension (ListenArgs { browser }) = do
     browserName = case browser of
       Chrome -> "Google Chrome"
       Edge -> "Microsoft Edge"
-  let command = "open"
-  let args' = [ "-a", browserName, "--args", "--remote-debugging-port=" <> show port ]
-  runCommand command args'
+  let command = "open -a '" <> browserName <> "' --args --remote-debugging-port= " <> show port
+  runCommand command
   launchAff_ $ runInBrowser
 
 foreign import runInBrowserImpl :: forall a. String -> Effect (Promise a)
 
-runCommand :: String -> Array String -> Effect Unit
-runCommand command args' = do
-  _ <- spawn command args' defaultSpawnOptions
+runCommand :: String -> Effect Unit
+runCommand command = do
+  _ <- execSync command defaultExecSyncOptions
   pure unit
 
 runInBrowser :: Aff Unit

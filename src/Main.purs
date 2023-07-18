@@ -1,20 +1,14 @@
 module Main where
 
 import Prelude
-import Types (Args(..), Browser(..), ExtensionInfo, InstallArgs(..), ListenArgs(..))
 
-import Data.Either (Either(..))
+import Browser (installExtension, listenExtension)
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
-import Effect.Aff (Aff, Milliseconds(..), delay, launchAff_, try)
-import Effect.Class (liftEffect)
-import Effect.Console (log)
-import Node.ChildProcess (defaultExecSyncOptions, execSync)
 import Options.Applicative (Parser, argument, command, execParser, fullDesc, header, helper, info, maybeReader, progDesc, str, subparser, (<**>))
 import Options.Applicative.Builder (metavar)
 import Options.Applicative.Types (optional)
-import Promise (Promise)
-import Promise.Aff (toAffE)
+import Types (Args(..), Browser(..), InstallArgs(..), ListenArgs(..))
 
 readBrowser :: String -> Maybe Browser
 readBrowser str = case str of
@@ -46,81 +40,3 @@ main = do
   case args' of
     Install installArgs' -> installExtension installArgs'
     Listen listenArgs' -> listenExtension listenArgs'
-
-installExtension :: InstallArgs -> Effect Unit
-installExtension (InstallArgs { browser, extensionId, script }) = log $
-  "Installing extension " <> extensionId <> " for browser " <> show browser <> " with script " <> show script
-
-port :: Int
-port = 9222
-
-isBrowserRunning :: String -> Effect Boolean
-isBrowserRunning browserName = do
-  let command = "pgrep -x '" <> browserName <> "'"
-  -- pgrep returns an error if it doesn't find any process matching the criteria
-  -- Catch the error and return False indicating that the browser is not running
-  result <- try $ execSync command defaultExecSyncOptions
-  case result of
-    Left _ -> pure false
-    Right _ -> pure true
-
-listenExtension :: ListenArgs -> Effect Unit
-listenExtension (ListenArgs { browser }) = do
-  log $ "Listening for changes in extensions for browser " <> show browser
-  -- https://chromedevtools.github.io/devtools-protocol/#remote
-  let
-    browserName = case browser of
-      Chrome -> "Google Chrome"
-      Edge -> "Microsoft Edge"
-  let url = show browser <> "://extensions/"
-  launchAff_ do
-    restartBrowser browserName
-    _ <- runInBrowser url getAllImpl
-    pure unit
-
-foreign import getAllImpl :: Aff (Array ExtensionInfo)
-
-runCommand :: String -> Effect Unit
-runCommand command = do
-  _ <- execSync command defaultExecSyncOptions
-  pure unit
-
-quitBrowser :: String -> Effect Unit
-quitBrowser browserName = do
-  let command = "osascript -e 'quit app \"" <> browserName <> "\"'"
-  runCommand command
-
-openBrowser :: String -> Effect Unit
-openBrowser browserName = do
-  let command = "open -a '" <> browserName <> "' --args --remote-debugging-port=" <> show port
-  runCommand command
-
-waitForBrowserToClose :: String -> Aff Unit
-waitForBrowserToClose browserName = do
-  running <- liftEffect $ isBrowserRunning browserName
-  when running do
-    delay $ Milliseconds 1000.0
-    waitForBrowserToClose browserName
-
-restartBrowser :: String -> Aff Unit
-restartBrowser browserName = do
-  running <- liftEffect $ isBrowserRunning browserName
-  when running do
-    liftEffect $ quitBrowser browserName
-    waitForBrowserToClose browserName
-  liftEffect $ openBrowser browserName
-
-foreign import runInBrowserImpl :: forall a. String -> String -> Aff a -> Effect (Promise a)
-
-runInBrowser :: forall a. String -> Aff a -> Aff a
-runInBrowser url script = do
-  let endpointURL = "http://localhost:" <> show port
-  -- Wait for a second and then retry connecting if the initial attempt to connect fails.
-  -- toAffE $ runInBrowserImpl endpointURL url
-  res <- try $ toAffE $ runInBrowserImpl endpointURL url script
-  case res of
-    Left _ -> do
-      delay $ Milliseconds 1000.0
-      runInBrowser url script
-    Right res' -> do
-      pure res'

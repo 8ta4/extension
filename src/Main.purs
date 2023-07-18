@@ -1,11 +1,10 @@
 module Main where
 
 import Prelude
+import Types (Args(..), Browser(..), ExtensionInfo, InstallArgs(..), ListenArgs(..))
 
 import Data.Either (Either(..))
-import Data.Generic.Rep (class Generic)
 import Data.Maybe (Maybe(..))
-import Data.Show.Generic (genericShow)
 import Effect (Effect)
 import Effect.Aff (Aff, Milliseconds(..), delay, launchAff_, try)
 import Effect.Class (liftEffect)
@@ -17,22 +16,11 @@ import Options.Applicative.Types (optional)
 import Promise (Promise)
 import Promise.Aff (toAffE)
 
-data Browser = Chrome | Edge
-
-derive instance genericBrowser :: Generic Browser _
-
-instance showBrowser :: Show Browser where
-  show = genericShow
-
 readBrowser :: String -> Maybe Browser
 readBrowser str = case str of
   "chrome" -> Just Chrome
   "edge" -> Just Edge
   _ -> Nothing
-
-data InstallArgs = InstallArgs { browser :: Browser, extensionId :: String, script :: Maybe String }
-
-data ListenArgs = ListenArgs { browser :: Browser }
 
 browserArg :: Parser Browser
 browserArg = argument (maybeReader readBrowser) (metavar "BROWSER")
@@ -45,8 +33,6 @@ installArgs = map InstallArgs $ { browser: _, extensionId: _, script: _ }
 
 listenArgs :: Parser ListenArgs
 listenArgs = map ListenArgs $ { browser: _ } <$> browserArg
-
-data Args = Install InstallArgs | Listen ListenArgs
 
 args :: Parser Args
 args = subparser
@@ -91,11 +77,6 @@ listenExtension (ListenArgs { browser }) = do
     restartBrowser browserName
     _ <- runInBrowser url getAllImpl
     pure unit
-
--- https://developer.chrome.com/docs/extensions/reference/management/#type-ExtensionInfo
-type ExtensionInfo =
-  { id :: String
-  }
 
 foreign import getAllImpl :: Aff (Array ExtensionInfo)
 

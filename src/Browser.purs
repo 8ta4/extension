@@ -82,7 +82,6 @@ runInBrowser :: forall a. String -> Script a -> Aff a
 runInBrowser url script = do
   let endpointURL = "http://localhost:" <> show port
   -- Wait for a second and then retry connecting if the initial attempt to connect fails.
-  -- toAffE $ runInBrowserImpl endpointURL url
   res <- try $ toAffE $ runInBrowserImpl endpointURL url script
   case res of
     Left _ -> do

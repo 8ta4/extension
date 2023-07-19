@@ -4,6 +4,7 @@ import Prelude
 
 import Data.Either (Either(..))
 import Data.Foldable (for_)
+import Data.String (toLower)
 import Effect (Effect)
 import Effect.Aff (Aff, Milliseconds(..), delay, launchAff_, try)
 import Effect.Class (liftEffect)
@@ -11,7 +12,7 @@ import Effect.Console (log)
 import Node.ChildProcess (defaultExecSyncOptions, execSync)
 import Promise (Promise)
 import Promise.Aff (toAffE)
-import Types (Browser(..), ExtensionInfo, InstallArgs(..), ListenArgs(..))
+import Types (Browser(..), ExtensionInfo, InstallArgs(..), ListenArgs(..), Script)
 
 installExtension :: InstallArgs -> Effect Unit
 installExtension (InstallArgs { browser, extensionId, script }) = log $
@@ -25,7 +26,7 @@ listenExtension (ListenArgs { browser }) = do
     browserName = case browser of
       Chrome -> "Google Chrome"
       Edge -> "Microsoft Edge"
-  let url = show browser <> "://extensions/"
+  let url = toLower $ show browser <> "://extensions/"
   launchAff_ do
     restartBrowser browserName
     extensions <- runInBrowser url getAllImpl
@@ -77,7 +78,7 @@ openBrowser browserName = do
 port :: Int
 port = 9222
 
-runInBrowser :: forall a. String -> Aff a -> Aff a
+runInBrowser :: forall a. String -> Script a -> Aff a
 runInBrowser url script = do
   let endpointURL = "http://localhost:" <> show port
   -- Wait for a second and then retry connecting if the initial attempt to connect fails.
@@ -90,8 +91,8 @@ runInBrowser url script = do
     Right res' -> do
       pure res'
 
-foreign import runInBrowserImpl :: forall a. String -> String -> Aff a -> Effect (Promise a)
+foreign import runInBrowserImpl :: forall a. String -> String -> Script a -> Effect (Promise a)
 
-foreign import getAllImpl :: Aff (Array ExtensionInfo)
+foreign import getAllImpl :: Script (Array ExtensionInfo)
 
-foreign import addListenerImpl :: Aff Unit
+foreign import addListenerImpl :: Script Unit

@@ -19,6 +19,9 @@ derive instance genericBrowser :: Generic Browser _
 instance showBrowser :: Show Browser where
   show = genericShow
 
+data Script :: forall k. k -> Type
+data Script a
+
 -- https://developer.chrome.com/docs/extensions/reference/management/#type-ExtensionInfo
 type ExtensionInfo =
   { id :: String

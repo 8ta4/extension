@@ -23,6 +23,7 @@ to generate this file without the comments in this block.
   , "node-child-process"
   , "optparse"
   , "prelude"
+  , "strings"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]

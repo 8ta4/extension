@@ -4,6 +4,7 @@ import Prelude
 
 import Data.Either (Either(..))
 import Data.Foldable (for_)
+import Data.String (toLower)
 import Effect (Effect)
 import Effect.Aff (Aff, Milliseconds(..), delay, launchAff_, try)
 import Effect.Class (liftEffect)
@@ -25,7 +26,7 @@ listenExtension (ListenArgs { browser }) = do
     browserName = case browser of
       Chrome -> "Google Chrome"
       Edge -> "Microsoft Edge"
-  let url = show browser <> "://extensions/"
+  let url = toLower $ show browser <> "://extensions/"
   launchAff_ do
     restartBrowser browserName
     extensions <- runInBrowser url getAllImpl

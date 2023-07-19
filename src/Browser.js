@@ -4,6 +4,10 @@ export const getAllImpl = async () => {
   return await chrome.management.getAll();
 };
 
+export const addListenerImpl = async () => {
+  return await chrome.storage.onChanged.addListener(console.log);
+};
+
 export const runInBrowserImpl = (endpointURL) => (url) => (script) => () =>
   new Promise(async (resolve, reject) => {
     try {

@@ -3,6 +3,7 @@ module Browser where
 import Prelude
 
 import Data.Either (Either(..))
+import Data.Foldable (for_)
 import Effect (Effect)
 import Effect.Aff (Aff, Milliseconds(..), delay, launchAff_, try)
 import Effect.Class (liftEffect)
@@ -29,7 +30,8 @@ listenExtension (ListenArgs { browser }) = do
     restartBrowser browserName
     extensions <- runInBrowser url getAllImpl
     let ids = map _.id extensions
-    let _ = map (\id -> "chrome-extension://" <> id <> "/manifest.json") ids
+    let urls = map (\id -> "chrome-extension://" <> id <> "/manifest.json") ids
+    for_ urls $ \url' -> runInBrowser url' addListenerImpl
     pure unit
 
 restartBrowser :: String -> Aff Unit
@@ -91,3 +93,5 @@ runInBrowser url script = do
 foreign import runInBrowserImpl :: forall a. String -> String -> Aff a -> Effect (Promise a)
 
 foreign import getAllImpl :: Aff (Array ExtensionInfo)
+
+foreign import addListenerImpl :: Aff Unit

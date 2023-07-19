@@ -71,11 +71,13 @@ If the extension is already installed, `extension` will just apply the configura
 
 > How can I use the `extension` command with Edge?
 
-All you have to do is replace `chrome` with `edge` in the command line argument. For example, if you want to install the Video Speed Controller extension on Edge, your command would look like this:
+For example, let's say you want to enjoy a dark mode on any website with the [Dark Reader](https://microsoftedge.microsoft.com/addons/detail/dark-reader/ifoakfbpdcdoeenechcleahebpibofpc) extension. To install it on Edge, your command would look like this:
 
 ```sh
-extension install edge nffaoalbilbmmfgbnbgppjihopabppdk
+extension install edge ifoakfbpdcdoeenechcleahebpibofpc
 ```
+
+Here, `ifoakfbpdcdoeenechcleahebpibofpc` is the ID for the Dark Reader extension on the Microsoft Edge Add-ons website.
 
 > Can I use `extension` with browsers other than Chrome and Edge?
 

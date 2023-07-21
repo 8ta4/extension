@@ -28,11 +28,18 @@ installExtension (InstallArgs { browser, extensionId, script }) = do
   log $ "Installing extension " <> extensionId <> " for browser " <> show browser <> " with script " <> show script
   homeDirectory <- homedir
   -- https://developer.chrome.com/docs/extensions/mv3/external_extensions/#preference-mac
-  let extensionDirectory = homeDirectory <> "/Library/Application Support/Google/Chrome/External Extensions"
+  -- https://learn.microsoft.com/en-us/microsoft-edge/extensions-chromium/developer-guide/alternate-distribution-options#using-a-preferences-json-file-macos-and-linux
+  let
+    extensionDirectory = case browser of
+      Chrome -> homeDirectory <> "/Library/Application Support/Google/Chrome/External Extensions"
+      Edge -> homeDirectory <> "/Library/Application Support/Microsoft Edge/External Extensions"
+  let preferencesFileSourcePath = "preferences/" <> toLower (show browser) <> ".json"
   let preferencesFilePath = extensionDirectory <> "/" <> extensionId <> ".json"
   -- https://github.com/purescript-node/purescript-node-fs/blob/5414a5019bf37a0a2d06514d15c51c61aee33c4a/src/Node/FS/Sync.purs#L234
+  -- create directory, if it doesn't exist
   mkdir' extensionDirectory { mode: mkPerms all all all, recursive: true }
-  copyFile' "preferences.json" preferencesFilePath copyFile_FICLONE
+  -- copy correct preferences file based on browser
+  copyFile' preferencesFileSourcePath preferencesFilePath copyFile_FICLONE
 
 listenExtension :: ListenArgs -> Effect Unit
 listenExtension (ListenArgs { browser }) = do

@@ -14,14 +14,25 @@ import Effect.Console (log)
 import Foreign (ForeignError)
 import Foreign.Object (toUnfoldable)
 import Node.ChildProcess (defaultExecSyncOptions, execSync)
+import Node.FS.Constants (copyFile_FICLONE)
+import Node.FS.Perms (all, mkPerms)
+import Node.FS.Sync (copyFile', mkdir')
+import Node.OS (homedir)
 import Promise (Promise)
 import Promise.Aff (toAffE)
 import Simple.JSON (readJSON, unsafeStringify)
 import Types (Browser(..), Change, ExtensionInfo, InstallArgs(..), ListenArgs(..), Message, Script, Options)
 
 installExtension :: InstallArgs -> Effect Unit
-installExtension (InstallArgs { browser, extensionId, script }) = log $
-  "Installing extension " <> extensionId <> " for browser " <> show browser <> " with script " <> show script
+installExtension (InstallArgs { browser, extensionId, script }) = do
+  log $ "Installing extension " <> extensionId <> " for browser " <> show browser <> " with script " <> show script
+  homeDirectory <- homedir
+  -- https://developer.chrome.com/docs/extensions/mv3/external_extensions/#preference-mac
+  let extensionDirectory = homeDirectory <> "/Library/Application Support/Google/Chrome/External Extensions"
+  let preferencesFilePath = extensionDirectory <> "/" <> extensionId <> ".json"
+  -- https://github.com/purescript-node/purescript-node-fs/blob/5414a5019bf37a0a2d06514d15c51c61aee33c4a/src/Node/FS/Sync.purs#L234
+  mkdir' extensionDirectory { mode: mkPerms all all all, recursive: true }
+  copyFile' "preferences.json" preferencesFilePath copyFile_FICLONE
 
 listenExtension :: ListenArgs -> Effect Unit
 listenExtension (ListenArgs { browser }) = do

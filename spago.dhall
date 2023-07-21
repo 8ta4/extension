@@ -24,6 +24,8 @@ to generate this file without the comments in this block.
   , "lists"
   , "maybe"
   , "node-child-process"
+  , "node-fs"
+  , "node-os"
   , "optparse"
   , "prelude"
   , "simple-json"

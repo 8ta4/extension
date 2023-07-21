@@ -25,6 +25,7 @@ export const runInBrowserImpl =
         const page = await defaultContext.newPage();
         await page.goto(url);
         const result = await page.evaluate(script, scriptArg);
+        await browser.close();
         resolve(result);
       } catch (e) {
         reject(e);

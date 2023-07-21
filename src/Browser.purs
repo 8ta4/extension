@@ -39,7 +39,7 @@ listenExtension (ListenArgs { browser }) = do
     extensions <- runInBrowser url getAll unit
     let ids = map _.id extensions
     let urls = map (\id -> "chrome-extension://" <> id <> "/manifest.json") ids
-    for_ urls $ \url' -> runInBrowser url' addListener url'
+    for_ urls $ \url' -> runInBrowser url' addListener { extension: url', webSocket: "ws://localhost:8080" }
     pure unit
 
 type Options = { port :: Int }

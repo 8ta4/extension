@@ -37,10 +37,10 @@ export const getAll = async () => {
   return await chrome.management.getAll();
 };
 
-export const addListener = (url) => {
+export const addListener = (scriptArg) => {
   // https://developer.mozilla.org/en-US/docs/Web/API/WebSocket#examples
   // Create WebSocket connection.
-  const socket = new WebSocket("ws://localhost:8080");
+  const socket = new WebSocket(scriptArg.webSocket);
 
   // Connection opened
   socket.addEventListener("open", (event) => {
@@ -55,7 +55,7 @@ export const addListener = (url) => {
   chrome.storage.onChanged.addListener((changes, areaName) => {
     socket.send(
       JSON.stringify({
-        url: url,
+        url: scriptArg.extension,
         changes: changes,
         areaName: areaName,
       }),

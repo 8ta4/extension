@@ -17,8 +17,7 @@ import Node.ChildProcess (defaultExecSyncOptions, execSync)
 import Promise (Promise)
 import Promise.Aff (toAffE)
 import Simple.JSON (readJSON, unsafeStringify)
-
-import Types (Browser(..), Change, ExtensionInfo, InstallArgs(..), ListenArgs(..), Message, Script)
+import Types (Browser(..), Change, ExtensionInfo, InstallArgs(..), ListenArgs(..), Message, Script, Options)
 
 installExtension :: InstallArgs -> Effect Unit
 installExtension (InstallArgs { browser, extensionId, script }) = log $
@@ -42,12 +41,10 @@ listenExtension (ListenArgs { browser }) = do
     for_ urls $ \url' -> runInBrowser url' addListener { extension: url', webSocket: "ws://localhost:" <> show webSocketPort }
     pure unit
 
-type Options = { port :: Int }
-
 foreign import handleWebSocket :: Options -> (String -> Effect Unit) -> Effect Unit
 
-decodeToMessage :: String -> Either (NonEmptyList ForeignError) Message
-decodeToMessage = readJSON
+webSocketPort :: Int
+webSocketPort = 8080
 
 handleMessage :: String -> Effect Unit
 handleMessage receivedMessage = do
@@ -59,8 +56,8 @@ handleMessage receivedMessage = do
       let changeArray = toUnfoldable $ _.changes decodedMessage' :: Array (Tuple String Change)
       for_ changeArray \change -> log $ "chrome.storage." <> _.areaName decodedMessage' <> ".set({" <> fst change <> ": " <> unsafeStringify (_.newValue $ snd change) <> "});"
 
-webSocketPort :: Int
-webSocketPort = 8080
+decodeToMessage :: String -> Either (NonEmptyList ForeignError) Message
+decodeToMessage = readJSON
 
 restartBrowser :: String -> Aff Unit
 restartBrowser browserName = do

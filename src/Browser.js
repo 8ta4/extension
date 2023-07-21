@@ -16,14 +16,6 @@ export const handleWebSocket = () => {
   });
 };
 
-export const getAllImpl = async () => {
-  return await chrome.management.getAll();
-};
-
-export const addListenerImpl = () => {
-  return chrome.storage.onChanged.addListener(console.log);
-};
-
 export const runInBrowserImpl = (endpointURL) => (url) => (script) => () =>
   new Promise(async (resolve, reject) => {
     try {
@@ -37,3 +29,11 @@ export const runInBrowserImpl = (endpointURL) => (url) => (script) => () =>
       reject(e);
     }
   });
+
+export const getAll = async () => {
+  return await chrome.management.getAll();
+};
+
+export const addListener = () => {
+  return chrome.storage.onChanged.addListener(console.log);
+};

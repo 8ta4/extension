@@ -31,10 +31,10 @@ listenExtension (ListenArgs { browser }) = do
   let url = toLower $ show browser <> "://extensions/"
   launchAff_ do
     restartBrowser browserName
-    extensions <- runInBrowser url getAllImpl
+    extensions <- runInBrowser url getAll
     let ids = map _.id extensions
     let urls = map (\id -> "chrome-extension://" <> id <> "/manifest.json") ids
-    for_ urls $ \url' -> runInBrowser url' addListenerImpl
+    for_ urls $ \url' -> runInBrowser url' addListener
     pure unit
 
 foreign import handleWebSocket :: Effect Unit
@@ -96,6 +96,6 @@ runInBrowser url script = do
 
 foreign import runInBrowserImpl :: forall a. String -> String -> Script a -> Effect (Promise a)
 
-foreign import getAllImpl :: Script (Array ExtensionInfo)
+foreign import getAll :: Script (Array ExtensionInfo)
 
-foreign import addListenerImpl :: Script Unit
+foreign import addListener :: Script Unit

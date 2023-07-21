@@ -31,10 +31,10 @@ listenExtension (ListenArgs { browser }) = do
   let url = toLower $ show browser <> "://extensions/"
   launchAff_ do
     restartBrowser browserName
-    extensions <- runInBrowser url getAll
+    extensions <- runInBrowser url getAll unit
     let ids = map _.id extensions
     let urls = map (\id -> "chrome-extension://" <> id <> "/manifest.json") ids
-    for_ urls $ \url' -> runInBrowser url' addListener
+    for_ urls $ \url' -> runInBrowser url' addListener url'
     pure unit
 
 foreign import handleWebSocket :: Effect Unit
@@ -82,19 +82,19 @@ openBrowser browserName = do
 port :: Int
 port = 9222
 
-runInBrowser :: forall a. String -> Script a -> Aff a
-runInBrowser url script = do
+runInBrowser :: forall a b. String -> Script a -> b -> Aff a
+runInBrowser url script scriptArg = do
   let endpointURL = "http://localhost:" <> show port
   -- Wait for a second and then retry connecting if the initial attempt to connect fails.
-  res <- try $ toAffE $ runInBrowserImpl endpointURL url script
+  res <- try $ toAffE $ runInBrowserImpl endpointURL url script scriptArg
   case res of
     Left _ -> do
       delay $ Milliseconds 1000.0
-      runInBrowser url script
+      runInBrowser url script unit
     Right res' -> do
       pure res'
 
-foreign import runInBrowserImpl :: forall a. String -> String -> Script a -> Effect (Promise a)
+foreign import runInBrowserImpl :: forall a b. String -> String -> Script a -> b -> Effect (Promise a)
 
 foreign import getAll :: Script (Array ExtensionInfo)
 

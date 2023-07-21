@@ -16,25 +16,26 @@ export const handleWebSocket = () => {
   });
 };
 
-export const runInBrowserImpl = (endpointURL) => (url) => (script) => () =>
-  new Promise(async (resolve, reject) => {
-    try {
-      const browser = await playwright.chromium.connectOverCDP(endpointURL);
-      const defaultContext = browser.contexts()[0];
-      const page = await defaultContext.newPage();
-      await page.goto(url);
-      const result = await page.evaluate(script);
-      resolve(result);
-    } catch (e) {
-      reject(e);
-    }
-  });
+export const runInBrowserImpl =
+  (endpointURL) => (url) => (script) => (scriptArg) => () =>
+    new Promise(async (resolve, reject) => {
+      try {
+        const browser = await playwright.chromium.connectOverCDP(endpointURL);
+        const defaultContext = browser.contexts()[0];
+        const page = await defaultContext.newPage();
+        await page.goto(url);
+        const result = await page.evaluate(script, scriptArg);
+        resolve(result);
+      } catch (e) {
+        reject(e);
+      }
+    });
 
 export const getAll = async () => {
   return await chrome.management.getAll();
 };
 
-export const addListener = () => {
+export const addListener = (url) => {
   // https://developer.mozilla.org/en-US/docs/Web/API/WebSocket#examples
   // Create WebSocket connection.
   const socket = new WebSocket("ws://localhost:8080");
@@ -49,6 +50,6 @@ export const addListener = () => {
     console.log("Message from server ", event.data);
   });
   chrome.storage.onChanged.addListener((changes, area) => {
-    socket.send(JSON.stringify([changes, area]));
+    socket.send(JSON.stringify([url, changes, area]));
   });
 };

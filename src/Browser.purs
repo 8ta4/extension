@@ -12,6 +12,7 @@ import Effect.Console (log)
 import Node.ChildProcess (defaultExecSyncOptions, execSync)
 import Promise (Promise)
 import Promise.Aff (toAffE)
+
 import Types (Browser(..), ExtensionInfo, InstallArgs(..), ListenArgs(..), Script)
 
 installExtension :: InstallArgs -> Effect Unit
@@ -21,6 +22,7 @@ installExtension (InstallArgs { browser, extensionId, script }) = log $
 listenExtension :: ListenArgs -> Effect Unit
 listenExtension (ListenArgs { browser }) = do
   log $ "Listening for changes in extensions for browser " <> show browser
+  handleWebSocket
   -- https://chromedevtools.github.io/devtools-protocol/#remote
   let
     browserName = case browser of
@@ -29,11 +31,13 @@ listenExtension (ListenArgs { browser }) = do
   let url = toLower $ show browser <> "://extensions/"
   launchAff_ do
     restartBrowser browserName
-    extensions <- runInBrowser url getAllImpl
+    extensions <- runInBrowser url getAll unit
     let ids = map _.id extensions
     let urls = map (\id -> "chrome-extension://" <> id <> "/manifest.json") ids
-    for_ urls $ \url' -> runInBrowser url' addListenerImpl
+    for_ urls $ \url' -> runInBrowser url' addListener url'
     pure unit
+
+foreign import handleWebSocket :: Effect Unit
 
 restartBrowser :: String -> Aff Unit
 restartBrowser browserName = do
@@ -78,20 +82,20 @@ openBrowser browserName = do
 port :: Int
 port = 9222
 
-runInBrowser :: forall a. String -> Script a -> Aff a
-runInBrowser url script = do
+runInBrowser :: forall a b. String -> Script a -> b -> Aff a
+runInBrowser url script scriptArg = do
   let endpointURL = "http://localhost:" <> show port
   -- Wait for a second and then retry connecting if the initial attempt to connect fails.
-  res <- try $ toAffE $ runInBrowserImpl endpointURL url script
+  res <- try $ toAffE $ runInBrowserImpl endpointURL url script scriptArg
   case res of
     Left _ -> do
       delay $ Milliseconds 1000.0
-      runInBrowser url script
+      runInBrowser url script unit
     Right res' -> do
       pure res'
 
-foreign import runInBrowserImpl :: forall a. String -> String -> Script a -> Effect (Promise a)
+foreign import runInBrowserImpl :: forall a b. String -> String -> Script a -> b -> Effect (Promise a)
 
-foreign import getAllImpl :: Script (Array ExtensionInfo)
+foreign import getAll :: Script (Array ExtensionInfo)
 
-foreign import addListenerImpl :: Script Unit
+foreign import addListener :: Script Unit

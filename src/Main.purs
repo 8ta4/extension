@@ -2,12 +2,13 @@ module Main where
 
 import Prelude
 
-import Browser (installExtension, listenExtension)
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Options.Applicative (Parser, argument, command, execParser, fullDesc, header, helper, info, maybeReader, progDesc, str, subparser, (<**>))
 import Options.Applicative.Builder (metavar)
 import Options.Applicative.Types (optional)
+
+import Browser (installExtension, listenExtension)
 import Types (Args(..), Browser(..), InstallArgs(..), ListenArgs(..))
 
 main :: Effect Unit

@@ -128,7 +128,7 @@ runInBrowser url script scriptArg = do
   case res of
     Left _ -> do
       delay $ Milliseconds 1000.0
-      runInBrowser url script unit
+      runInBrowser url script scriptArg
     Right res' -> do
       pure res'
 

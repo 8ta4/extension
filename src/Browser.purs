@@ -12,6 +12,7 @@ import Effect.Console (log)
 import Node.ChildProcess (defaultExecSyncOptions, execSync)
 import Promise (Promise)
 import Promise.Aff (toAffE)
+
 import Types (Browser(..), ExtensionInfo, InstallArgs(..), ListenArgs(..), Script)
 
 installExtension :: InstallArgs -> Effect Unit

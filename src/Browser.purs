@@ -4,16 +4,18 @@ import Prelude
 
 import Data.Either (Either(..))
 import Data.Foldable (for_)
+import Data.List.NonEmpty (NonEmptyList)
 import Data.String (toLower)
 import Effect (Effect)
 import Effect.Aff (Aff, Milliseconds(..), delay, launchAff_, try)
 import Effect.Class (liftEffect)
 import Effect.Console (log)
+import Foreign (ForeignError)
 import Node.ChildProcess (defaultExecSyncOptions, execSync)
 import Promise (Promise)
 import Promise.Aff (toAffE)
-
-import Types (Browser(..), ExtensionInfo, InstallArgs(..), ListenArgs(..), Script)
+import Simple.JSON (readJSON)
+import Types (Browser(..), ExtensionInfo, InstallArgs(..), ListenArgs(..), Script, Message)
 
 installExtension :: InstallArgs -> Effect Unit
 installExtension (InstallArgs { browser, extensionId, script }) = log $
@@ -22,7 +24,7 @@ installExtension (InstallArgs { browser, extensionId, script }) = log $
 listenExtension :: ListenArgs -> Effect Unit
 listenExtension (ListenArgs { browser }) = do
   log $ "Listening for changes in extensions for browser " <> show browser
-  handleWebSocket
+  handleWebSocket handleMessage
   -- https://chromedevtools.github.io/devtools-protocol/#remote
   let
     browserName = case browser of
@@ -37,7 +39,17 @@ listenExtension (ListenArgs { browser }) = do
     for_ urls $ \url' -> runInBrowser url' addListener url'
     pure unit
 
-foreign import handleWebSocket :: Effect Unit
+foreign import handleWebSocket :: (String -> Effect Unit) -> Effect Unit
+
+decodeToMessage :: String -> Either (NonEmptyList ForeignError) Message
+decodeToMessage = readJSON
+
+handleMessage :: String -> Effect Unit
+handleMessage receivedMessage = do
+  let decodedMessage = decodeToMessage receivedMessage
+  case decodedMessage of
+    Left _ -> pure unit
+    Right _ -> pure unit
 
 restartBrowser :: String -> Aff Unit
 restartBrowser browserName = do

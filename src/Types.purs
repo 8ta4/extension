@@ -5,6 +5,7 @@ import Prelude
 import Data.Generic.Rep (class Generic)
 import Data.Maybe (Maybe)
 import Data.Show.Generic (genericShow)
+import Foreign (Foreign)
 
 data Args = Install InstallArgs | Listen ListenArgs
 
@@ -26,3 +27,5 @@ data Script a
 type ExtensionInfo =
   { id :: String
   }
+
+type Message = { url :: String, changes :: Foreign, areaName :: String }

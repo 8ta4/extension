@@ -17,12 +17,15 @@ to generate this file without the comments in this block.
   , "effect"
   , "either"
   , "foldable-traversable"
+  , "foreign"
   , "js-promise"
   , "js-promise-aff"
+  , "lists"
   , "maybe"
   , "node-child-process"
   , "optparse"
   , "prelude"
+  , "simple-json"
   , "strings"
   ]
 , packages = ./packages.dhall

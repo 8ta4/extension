@@ -21,7 +21,7 @@ export const runInBrowserImpl = (endpointURL) => (url) => (script) => () =>
     try {
       const browser = await playwright.chromium.connectOverCDP(endpointURL);
       const defaultContext = browser.contexts()[0];
-      const page = defaultContext.pages()[0];
+      const page = await defaultContext.newPage();
       await page.goto(url);
       const result = await page.evaluate(script);
       resolve(result);

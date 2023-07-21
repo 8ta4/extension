@@ -50,7 +50,8 @@ export const addListener = (url) => {
   socket.addEventListener("message", (event) => {
     console.log("Message from server ", event.data);
   });
-  chrome.storage.onChanged.addListener((changes, area) => {
-    socket.send(JSON.stringify([url, changes, area]));
+  // https://developer.chrome.com/docs/extensions/reference/storage/#event-onChanged#method-onChanged-callback
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    socket.send(JSON.stringify([url, changes, areaName]));
   });
 };

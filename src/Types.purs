@@ -21,12 +21,14 @@ derive instance genericBrowser :: Generic Browser _
 instance showBrowser :: Show Browser where
   show = genericShow
 
+type Options = { port :: Int }
+
+type Change = { newValue :: Foreign }
+
+type Message = { url :: String, changes :: Object Change, areaName :: String }
+
 data Script :: forall k. k -> Type
 data Script a
 
 -- https://developer.chrome.com/docs/extensions/reference/management/#type-ExtensionInfo
 type ExtensionInfo = { id :: String }
-
-type Change = { newValue :: Foreign }
-
-type Message = { url :: String, changes :: Object Change, areaName :: String }

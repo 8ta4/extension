@@ -1,19 +1,13 @@
 import playwright from "playwright";
 import { WebSocketServer } from "ws";
 
-export const handleWebSocket = (handleMessage) => () => {
-  // https://github.com/websockets/ws#simple-server
-  const wss = new WebSocketServer({ port: 8080 });
+export const handleWebSocket = (options) => (handleMessage) => () => {
+  const wss = new WebSocketServer(options);
 
-  wss.on("connection", function connection(ws) {
-    ws.on("error", console.error);
-
-    ws.on("message", function message(data) {
+  wss.on("connection", (ws) => {
+    ws.on("message", (data) => {
       handleMessage(data)();
-      console.log("received: %s", data);
     });
-
-    ws.send("something");
   });
 };
 
@@ -37,25 +31,15 @@ export const getAll = async () => {
   return await chrome.management.getAll();
 };
 
-export const addListener = (url) => {
-  // https://developer.mozilla.org/en-US/docs/Web/API/WebSocket#examples
+export const addListener = (scriptArg) => {
   // Create WebSocket connection.
-  const socket = new WebSocket("ws://localhost:8080");
+  const socket = new WebSocket(scriptArg.webSocket);
 
-  // Connection opened
-  socket.addEventListener("open", (event) => {
-    socket.send("Hello Server!");
-  });
-
-  // Listen for messages
-  socket.addEventListener("message", (event) => {
-    console.log("Message from server ", event.data);
-  });
   // https://developer.chrome.com/docs/extensions/reference/storage/#event-onChanged#method-onChanged-callback
   chrome.storage.onChanged.addListener((changes, areaName) => {
     socket.send(
       JSON.stringify({
-        url: url,
+        url: scriptArg.extension,
         changes: changes,
         areaName: areaName,
       }),

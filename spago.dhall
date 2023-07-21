@@ -17,13 +17,18 @@ to generate this file without the comments in this block.
   , "effect"
   , "either"
   , "foldable-traversable"
+  , "foreign"
+  , "foreign-object"
   , "js-promise"
   , "js-promise-aff"
+  , "lists"
   , "maybe"
   , "node-child-process"
   , "optparse"
   , "prelude"
+  , "simple-json"
   , "strings"
+  , "tuples"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]

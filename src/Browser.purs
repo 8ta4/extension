@@ -4,16 +4,21 @@ import Prelude
 
 import Data.Either (Either(..))
 import Data.Foldable (for_)
+import Data.List.NonEmpty (NonEmptyList)
 import Data.String (toLower)
+import Data.Tuple (Tuple, fst, snd)
 import Effect (Effect)
 import Effect.Aff (Aff, Milliseconds(..), delay, launchAff_, try)
 import Effect.Class (liftEffect)
 import Effect.Console (log)
+import Foreign (ForeignError)
+import Foreign.Object (toUnfoldable)
 import Node.ChildProcess (defaultExecSyncOptions, execSync)
 import Promise (Promise)
 import Promise.Aff (toAffE)
+import Simple.JSON (readJSON, unsafeStringify)
 
-import Types (Browser(..), ExtensionInfo, InstallArgs(..), ListenArgs(..), Script)
+import Types (Browser(..), Change, ExtensionInfo, InstallArgs(..), ListenArgs(..), Message, Script)
 
 installExtension :: InstallArgs -> Effect Unit
 installExtension (InstallArgs { browser, extensionId, script }) = log $
@@ -22,7 +27,7 @@ installExtension (InstallArgs { browser, extensionId, script }) = log $
 listenExtension :: ListenArgs -> Effect Unit
 listenExtension (ListenArgs { browser }) = do
   log $ "Listening for changes in extensions for browser " <> show browser
-  handleWebSocket
+  handleWebSocket handleMessage
   -- https://chromedevtools.github.io/devtools-protocol/#remote
   let
     browserName = case browser of
@@ -37,7 +42,20 @@ listenExtension (ListenArgs { browser }) = do
     for_ urls $ \url' -> runInBrowser url' addListener url'
     pure unit
 
-foreign import handleWebSocket :: Effect Unit
+foreign import handleWebSocket :: (String -> Effect Unit) -> Effect Unit
+
+decodeToMessage :: String -> Either (NonEmptyList ForeignError) Message
+decodeToMessage = readJSON
+
+handleMessage :: String -> Effect Unit
+handleMessage receivedMessage = do
+  let decodedMessage = decodeToMessage receivedMessage
+  case decodedMessage of
+    Left _ -> pure unit
+    Right decodedMessage' -> do
+      log $ _.url decodedMessage'
+      let changeArray = toUnfoldable $ _.changes decodedMessage' :: Array (Tuple String Change)
+      for_ changeArray \change -> log $ "chrome.storage." <> _.areaName decodedMessage' <> ".set({" <> fst change <> ": " <> unsafeStringify (_.newValue $ snd change) <> "});"
 
 restartBrowser :: String -> Aff Unit
 restartBrowser browserName = do

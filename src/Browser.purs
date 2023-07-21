@@ -22,6 +22,7 @@ installExtension (InstallArgs { browser, extensionId, script }) = log $
 listenExtension :: ListenArgs -> Effect Unit
 listenExtension (ListenArgs { browser }) = do
   log $ "Listening for changes in extensions for browser " <> show browser
+  handleWebSocket
   -- https://chromedevtools.github.io/devtools-protocol/#remote
   let
     browserName = case browser of
@@ -35,6 +36,8 @@ listenExtension (ListenArgs { browser }) = do
     let urls = map (\id -> "chrome-extension://" <> id <> "/manifest.json") ids
     for_ urls $ \url' -> runInBrowser url' addListenerImpl
     pure unit
+
+foreign import handleWebSocket :: Effect Unit
 
 restartBrowser :: String -> Aff Unit
 restartBrowser browserName = do

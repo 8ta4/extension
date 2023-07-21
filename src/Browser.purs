@@ -27,7 +27,7 @@ installExtension (InstallArgs { browser, extensionId, script }) = log $
 listenExtension :: ListenArgs -> Effect Unit
 listenExtension (ListenArgs { browser }) = do
   log $ "Listening for changes in extensions for browser " <> show browser
-  handleWebSocket { port: 8080 } handleMessage
+  handleWebSocket { port: webSocketPort } handleMessage
   -- https://chromedevtools.github.io/devtools-protocol/#remote
   let
     browserName = case browser of
@@ -39,7 +39,7 @@ listenExtension (ListenArgs { browser }) = do
     extensions <- runInBrowser url getAll unit
     let ids = map _.id extensions
     let urls = map (\id -> "chrome-extension://" <> id <> "/manifest.json") ids
-    for_ urls $ \url' -> runInBrowser url' addListener { extension: url', webSocket: "ws://localhost:8080" }
+    for_ urls $ \url' -> runInBrowser url' addListener { extension: url', webSocket: "ws://localhost:" <> show webSocketPort }
     pure unit
 
 type Options = { port :: Int }
@@ -58,6 +58,9 @@ handleMessage receivedMessage = do
       log $ _.url decodedMessage'
       let changeArray = toUnfoldable $ _.changes decodedMessage' :: Array (Tuple String Change)
       for_ changeArray \change -> log $ "chrome.storage." <> _.areaName decodedMessage' <> ".set({" <> fst change <> ": " <> unsafeStringify (_.newValue $ snd change) <> "});"
+
+webSocketPort :: Int
+webSocketPort = 8080
 
 restartBrowser :: String -> Aff Unit
 restartBrowser browserName = do
@@ -96,15 +99,15 @@ waitForBrowserToClose browserName = do
 
 openBrowser :: String -> Effect Unit
 openBrowser browserName = do
-  let command = "open -a '" <> browserName <> "' --args --remote-debugging-port=" <> show port
+  let command = "open -a '" <> browserName <> "' --args --remote-debugging-port=" <> show remoteDebuggingPort
   runCommand command
 
-port :: Int
-port = 9222
+remoteDebuggingPort :: Int
+remoteDebuggingPort = 9222
 
 runInBrowser :: forall a b. String -> Script a -> b -> Aff a
 runInBrowser url script scriptArg = do
-  let endpointURL = "http://localhost:" <> show port
+  let endpointURL = "http://localhost:" <> show remoteDebuggingPort
   -- Wait for a second and then retry connecting if the initial attempt to connect fails.
   res <- try $ toAffE $ runInBrowserImpl endpointURL url script scriptArg
   case res of

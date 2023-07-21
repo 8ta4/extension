@@ -27,7 +27,7 @@ installExtension (InstallArgs { browser, extensionId, script }) = log $
 listenExtension :: ListenArgs -> Effect Unit
 listenExtension (ListenArgs { browser }) = do
   log $ "Listening for changes in extensions for browser " <> show browser
-  handleWebSocket handleMessage
+  handleWebSocket { port: 8080 } handleMessage
   -- https://chromedevtools.github.io/devtools-protocol/#remote
   let
     browserName = case browser of
@@ -42,7 +42,9 @@ listenExtension (ListenArgs { browser }) = do
     for_ urls $ \url' -> runInBrowser url' addListener url'
     pure unit
 
-foreign import handleWebSocket :: (String -> Effect Unit) -> Effect Unit
+type Options = { port :: Int }
+
+foreign import handleWebSocket :: Options -> (String -> Effect Unit) -> Effect Unit
 
 decodeToMessage :: String -> Either (NonEmptyList ForeignError) Message
 decodeToMessage = readJSON

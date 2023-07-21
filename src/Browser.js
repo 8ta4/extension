@@ -1,9 +1,9 @@
 import playwright from "playwright";
 import { WebSocketServer } from "ws";
 
-export const handleWebSocket = (handleMessage) => () => {
+export const handleWebSocket = (options) => (handleMessage) => () => {
   // https://github.com/websockets/ws#simple-server
-  const wss = new WebSocketServer({ port: 8080 });
+  const wss = new WebSocketServer(options);
 
   wss.on("connection", function connection(ws) {
     ws.on("error", console.error);

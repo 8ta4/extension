@@ -39,10 +39,10 @@ installExtension (InstallArgs { browser, extensionId, script }) = do
   copyFile' preferencesFileSourcePath preferencesFilePath copyFile_FICLONE
   launchAff_ do
     restartBrowser browser
-    runInBrowser (extensionUrl browser) enableExtension extensionId
+    runInBrowser (getExtensionsUrl browser) enableExtension extensionId
 
-extensionUrl :: Browser -> String
-extensionUrl browser = toLower $ show browser <> "://extensions/"
+getExtensionsUrl :: Browser -> String
+getExtensionsUrl browser = toLower $ show browser <> "://extensions/"
 
 foreign import enableExtension :: Script Unit
 
@@ -53,7 +53,7 @@ listenExtension (ListenArgs { browser }) = do
   -- https://chromedevtools.github.io/devtools-protocol/#remote
   launchAff_ do
     restartBrowser browser
-    extensions <- runInBrowser (extensionUrl browser) getAll unit
+    extensions <- runInBrowser (getExtensionsUrl browser) getAll unit
     let ids = map _.id extensions
     let urls = map (\id -> "chrome-extension://" <> id <> "/manifest.json") ids
     for_ urls $ \url -> runInBrowser url addListener { extension: url, webSocket: "ws://localhost:" <> show webSocketPort }

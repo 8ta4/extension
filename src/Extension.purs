@@ -54,8 +54,7 @@ listenExtension (ListenArgs { browser }) = do
   launchAff_ do
     restartBrowser browser
     extensions <- runInBrowser (getExtensionsUrl browser) getAll unit
-    let ids = map _.id extensions
-    let urls = map (\id -> "chrome-extension://" <> id <> "/manifest.json") ids
+    let urls = map (getExtensionUrl <<< _.id) extensions
     for_ urls $ \url -> runInBrowser url addListener { extension: url, webSocket: "ws://localhost:" <> show webSocketPort }
 
 foreign import handleWebSocket :: Options -> (String -> Effect Unit) -> Effect Unit
@@ -77,5 +76,8 @@ decodeToMessage :: String -> Either (NonEmptyList ForeignError) Message
 decodeToMessage = readJSON
 
 foreign import getAll :: Script (Array ExtensionInfo)
+
+getExtensionUrl :: String -> String
+getExtensionUrl id = "chrome-extension://" <> id <> "/manifest.json"
 
 foreign import addListener :: Script Unit

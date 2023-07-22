@@ -2,6 +2,7 @@ module Extension where
 
 import Prelude
 
+import Browser (remoteDebuggingPort, restartBrowser)
 import Data.Either (Either(..))
 import Data.Foldable (for_)
 import Data.List.NonEmpty (NonEmptyList)
@@ -9,11 +10,9 @@ import Data.String (toLower)
 import Data.Tuple (Tuple, fst, snd)
 import Effect (Effect)
 import Effect.Aff (Aff, Milliseconds(..), delay, launchAff_, try)
-import Effect.Class (liftEffect)
 import Effect.Console (log)
 import Foreign (ForeignError)
 import Foreign.Object (toUnfoldable)
-import Node.ChildProcess (defaultExecSyncOptions, execSync)
 import Node.FS.Constants (copyFile_FICLONE)
 import Node.FS.Perms (all, mkPerms)
 import Node.FS.Sync (copyFile', mkdir')
@@ -85,49 +84,6 @@ handleMessage receivedMessage = do
 
 decodeToMessage :: String -> Either (NonEmptyList ForeignError) Message
 decodeToMessage = readJSON
-
-restartBrowser :: String -> Aff Unit
-restartBrowser browserName = do
-  running <- liftEffect $ isBrowserRunning browserName
-  when running do
-    liftEffect $ quitBrowser browserName
-    waitForBrowserToClose browserName
-  liftEffect $ openBrowser browserName
-
-isBrowserRunning :: String -> Effect Boolean
-isBrowserRunning browserName = do
-  let command = "pgrep -x '" <> browserName <> "'"
-  -- pgrep returns an error if it doesn't find any process matching the criteria
-  -- Catch the error and return False indicating that the browser is not running
-  result <- try $ execSync command defaultExecSyncOptions
-  case result of
-    Left _ -> pure false
-    Right _ -> pure true
-
-quitBrowser :: String -> Effect Unit
-quitBrowser browserName = do
-  let command = "osascript -e 'quit app \"" <> browserName <> "\"'"
-  runCommand command
-
-runCommand :: String -> Effect Unit
-runCommand command = do
-  _ <- execSync command defaultExecSyncOptions
-  pure unit
-
-waitForBrowserToClose :: String -> Aff Unit
-waitForBrowserToClose browserName = do
-  running <- liftEffect $ isBrowserRunning browserName
-  when running do
-    delay $ Milliseconds 1000.0
-    waitForBrowserToClose browserName
-
-openBrowser :: String -> Effect Unit
-openBrowser browserName = do
-  let command = "open -a '" <> browserName <> "' --args --remote-debugging-port=" <> show remoteDebuggingPort
-  runCommand command
-
-remoteDebuggingPort :: Int
-remoteDebuggingPort = 9222
 
 runInBrowser :: forall a b. String -> Script a -> b -> Aff a
 runInBrowser url script scriptArg = do

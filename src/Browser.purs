@@ -60,7 +60,7 @@ runInBrowser url script scriptArg = do
   browser <- connectOverCDP endpointURL
   page <- toAffE $ newPage browser url
   res <- evaluate page script scriptArg
-  _ <- toAffE $ closeBrowser browser
+  _ <- toAffE $ close browser
   pure res
 
 data PlaywrightBrowser
@@ -83,7 +83,7 @@ foreign import newPage :: PlaywrightBrowser -> String -> Effect (Promise Playwri
 
 foreign import evaluateImpl :: forall a b. PlaywrightPage -> Script a -> b -> Effect (Promise a)
 
-foreign import closeBrowser :: PlaywrightBrowser -> Effect (Promise Unit)
+foreign import close :: PlaywrightBrowser -> Effect (Promise Unit)
 
 evaluate :: forall a b. PlaywrightPage -> Script a -> b -> Aff a
 evaluate page script scriptArg = do

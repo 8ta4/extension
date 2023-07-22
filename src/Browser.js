@@ -15,6 +15,6 @@ export const evaluateImpl = (page) => (script) => (scriptArg) => async () => {
   return await page.evaluate(script, scriptArg);
 };
 
-export const closeBrowser = (browser) => async () => {
+export const close = (browser) => async () => {
   await browser.close();
 };

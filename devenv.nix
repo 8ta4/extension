@@ -12,6 +12,10 @@
 
   # https://devenv.sh/scripts/
   scripts.hello.exec = "echo hello from $GREET";
+  scripts.build.exec = ''
+    ${pkgs.yarn}/bin/yarn install
+    ${pkgs.spago}/bin/spago build
+  '';
   scripts.run.exec = ''
     command="$@"
     spago run -wb "$command"

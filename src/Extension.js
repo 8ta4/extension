@@ -1,4 +1,3 @@
-import playwright from "playwright";
 import { WebSocketServer } from "ws";
 
 export const enableExtension = async (id) => {
@@ -13,29 +12,6 @@ export const handleWebSocket = (options) => (handleMessage) => () => {
       handleMessage(data)();
     });
   });
-};
-
-export const connectOverCDPImpl = (endpointURL) => async () => {
-  return await playwright.chromium.connectOverCDP(endpointURL);
-};
-
-export const newPage = (browser) => (url) => async () => {
-  const defaultContext = browser.contexts()[0];
-  const page = await defaultContext.newPage();
-  await page.goto(url);
-  return page;
-};
-
-export const evaluateImpl = (page) => (script) => (scriptArg) => async () => {
-  return await page.evaluate(script, scriptArg);
-};
-
-export const closePage = (page) => async () => {
-  await page.close();
-};
-
-export const closeBrowser = (browser) => async () => {
-  await browser.close();
 };
 
 export const getAll = async () => {

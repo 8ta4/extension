@@ -2,14 +2,14 @@ module Extension where
 
 import Prelude
 
-import Browser (remoteDebuggingPort, restartBrowser)
+import Browser (restartBrowser, runInBrowser)
 import Data.Either (Either(..))
 import Data.Foldable (for_)
 import Data.List.NonEmpty (NonEmptyList)
 import Data.String (toLower)
 import Data.Tuple (Tuple, fst, snd)
 import Effect (Effect)
-import Effect.Aff (Aff, Milliseconds(..), delay, launchAff_, try)
+import Effect.Aff (launchAff_)
 import Effect.Console (log)
 import Foreign (ForeignError)
 import Foreign.Object (toUnfoldable)
@@ -17,8 +17,6 @@ import Node.FS.Constants (copyFile_FICLONE)
 import Node.FS.Perms (all, mkPerms)
 import Node.FS.Sync (copyFile', mkdir')
 import Node.OS (homedir)
-import Promise (Promise)
-import Promise.Aff (toAffE)
 import Simple.JSON (readJSON, unsafeStringify)
 import Types (Browser(..), Change, ExtensionInfo, InstallArgs(..), ListenArgs(..), Message, Script, Options)
 
@@ -84,49 +82,6 @@ handleMessage receivedMessage = do
 
 decodeToMessage :: String -> Either (NonEmptyList ForeignError) Message
 decodeToMessage = readJSON
-
-runInBrowser :: forall a b. String -> Script a -> b -> Aff a
-runInBrowser url script scriptArg = do
-  let endpointURL = "http://localhost:" <> show remoteDebuggingPort
-  browser <- connectOverCDP endpointURL
-  page <- toAffE $ newPage browser url
-  res <- evaluate page script scriptArg
-  _ <- toAffE $ closeBrowser browser
-  pure res
-
-data PlaywrightBrowser
-
-foreign import connectOverCDPImpl :: String -> Effect (Promise PlaywrightBrowser)
-
-connectOverCDP :: String -> Aff PlaywrightBrowser
-connectOverCDP endpointURL = do
-  -- Wait for a second and then retry connecting if the initial attempt to connect fails.
-  browser <- try $ toAffE $ connectOverCDPImpl endpointURL
-  case browser of
-    Left _ -> do
-      delay $ Milliseconds 1000.0
-      connectOverCDP endpointURL
-    Right browser' -> pure browser'
-
-data PlaywrightPage
-
-foreign import newPage :: PlaywrightBrowser -> String -> Effect (Promise PlaywrightPage)
-
-foreign import evaluateImpl :: forall a b. PlaywrightPage -> Script a -> b -> Effect (Promise a)
-
-foreign import closePage :: PlaywrightPage -> Effect (Promise Unit)
-
-foreign import closeBrowser :: PlaywrightBrowser -> Effect (Promise Unit)
-
-evaluate :: forall a b. PlaywrightPage -> Script a -> b -> Aff a
-evaluate page script scriptArg = do
-  res <- try $ toAffE $ evaluateImpl page script scriptArg
-  case res of
-    Left _ -> do
-      toAffE $ closePage page
-      delay $ Milliseconds 1000.0
-      evaluate page script scriptArg
-    Right res' -> pure res'
 
 foreign import getAll :: Script (Array ExtensionInfo)
 

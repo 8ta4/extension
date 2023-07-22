@@ -1,6 +1,10 @@
 import playwright from "playwright";
 import { WebSocketServer } from "ws";
 
+export const enableExtension = async (id) => {
+  return await chrome.management.setEnabled(id, true);
+};
+
 export const handleWebSocket = (options) => (handleMessage) => () => {
   const wss = new WebSocketServer(options);
 

@@ -83,8 +83,6 @@ foreign import newPage :: PlaywrightBrowser -> String -> Effect (Promise Playwri
 
 foreign import evaluateImpl :: forall a b. PlaywrightPage -> Script a -> b -> Effect (Promise a)
 
-foreign import closePage :: PlaywrightPage -> Effect (Promise Unit)
-
 foreign import closeBrowser :: PlaywrightBrowser -> Effect (Promise Unit)
 
 evaluate :: forall a b. PlaywrightPage -> Script a -> b -> Aff a
@@ -92,7 +90,6 @@ evaluate page script scriptArg = do
   res <- try $ toAffE $ evaluateImpl page script scriptArg
   case res of
     Left _ -> do
-      toAffE $ closePage page
       delay $ Milliseconds 1000.0
       evaluate page script scriptArg
     Right res' -> pure res'

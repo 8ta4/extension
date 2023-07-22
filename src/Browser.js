@@ -1,6 +1,10 @@
 import playwright from "playwright";
 import { WebSocketServer } from "ws";
 
+export const enableExtension = async (id) => {
+  return await chrome.management.setEnabled(id, true);
+};
+
 export const handleWebSocket = (options) => (handleMessage) => () => {
   const wss = new WebSocketServer(options);
 
@@ -14,16 +18,24 @@ export const handleWebSocket = (options) => (handleMessage) => () => {
 export const runInBrowserImpl =
   (endpointURL) => (url) => (script) => (scriptArg) => () =>
     new Promise(async (resolve, reject) => {
+      let browser;
+      let page;
       try {
-        const browser = await playwright.chromium.connectOverCDP(endpointURL);
+        browser = await playwright.chromium.connectOverCDP(endpointURL);
         const defaultContext = browser.contexts()[0];
-        const page = await defaultContext.newPage();
+        page = await defaultContext.newPage();
         await page.goto(url);
         const result = await page.evaluate(script, scriptArg);
-        await browser.close();
         resolve(result);
       } catch (e) {
+        if (page) {
+          await page.close();
+        }
         reject(e);
+      } finally {
+        if (browser) {
+          await browser.close();
+        }
       }
     });
 

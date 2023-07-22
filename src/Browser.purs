@@ -40,6 +40,16 @@ installExtension (InstallArgs { browser, extensionId, script }) = do
   mkdir' extensionDirectory { mode: mkPerms all all all, recursive: true }
   -- copy correct preferences file based on browser
   copyFile' preferencesFileSourcePath preferencesFilePath copyFile_FICLONE
+  let
+    browserName = case browser of
+      Chrome -> "Google Chrome"
+      Edge -> "Microsoft Edge"
+  let url = toLower $ show browser <> "://extensions/"
+  launchAff_ do
+    restartBrowser browserName
+    runInBrowser url enableExtension extensionId
+
+foreign import enableExtension :: Script Unit
 
 listenExtension :: ListenArgs -> Effect Unit
 listenExtension (ListenArgs { browser }) = do

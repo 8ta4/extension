@@ -63,28 +63,32 @@ runInBrowser url script scriptArg = do
   _ <- toAffE $ close browser
   pure res
 
-connectOverCDP :: String -> Aff PlaywrightBrowser
-connectOverCDP endpointURL = do
-  -- Wait for a second and then retry connecting if the initial attempt to connect fails.
-  browser <- try $ toAffE $ connectOverCDPImpl endpointURL
-  case browser of
+tryRetry :: forall a. Aff a -> Aff a
+tryRetry action = do
+  result <- try action
+  case result of
     Left _ -> do
       delay $ Milliseconds 1000.0
-      connectOverCDP endpointURL
-    Right browser' -> pure browser'
+      tryRetry action
+    Right value -> pure value
+
+connectOverCDP :: String -> Aff PlaywrightBrowser
+connectOverCDP endpointURL =
+  let
+    action = toAffE $ connectOverCDPImpl endpointURL
+  in
+    tryRetry action
 
 foreign import connectOverCDPImpl :: String -> Effect (Promise PlaywrightBrowser)
 
 foreign import newPage :: PlaywrightBrowser -> String -> Effect (Promise PlaywrightPage)
 
 evaluate :: forall a b. PlaywrightPage -> Script a -> b -> Aff a
-evaluate page script scriptArg = do
-  res <- try $ toAffE $ evaluateImpl page script scriptArg
-  case res of
-    Left _ -> do
-      delay $ Milliseconds 1000.0
-      evaluate page script scriptArg
-    Right res' -> pure res'
+evaluate page script scriptArg =
+  let
+    action = toAffE $ evaluateImpl page script scriptArg
+  in
+    tryRetry action
 
 foreign import evaluateImpl :: forall a b. PlaywrightPage -> Script a -> b -> Effect (Promise a)
 

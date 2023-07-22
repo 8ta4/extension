@@ -23,6 +23,13 @@ import Types (Browser(..), Change, ExtensionInfo, InstallArgs(..), ListenArgs(..
 installExtension :: InstallArgs -> Effect Unit
 installExtension (InstallArgs { browser, extensionId, script }) = do
   log $ "Installing extension " <> extensionId <> " for browser " <> show browser <> " with script " <> show script
+  setupPrefsDirectory browser extensionId
+  launchAff_ do
+    restartBrowser browser
+    runInBrowser (getExtensionsUrl browser) enableExtension extensionId
+
+setupPrefsDirectory :: Browser -> String -> Effect Unit
+setupPrefsDirectory browser extensionId = do
   homeDirectory <- homedir
   -- https://developer.chrome.com/docs/extensions/mv3/external_extensions/#preference-mac
   -- https://learn.microsoft.com/en-us/microsoft-edge/extensions-chromium/developer-guide/alternate-distribution-options#using-a-preferences-json-file-macos-and-linux
@@ -37,14 +44,9 @@ installExtension (InstallArgs { browser, extensionId, script }) = do
   mkdir' extensionDirectory { mode: mkPerms all all all, recursive: true }
   -- copy correct preferences file based on browser
   copyFile' preferencesFileSourcePath preferencesFilePath copyFile_FICLONE
-  let
-    browserName = case browser of
-      Chrome -> "Google Chrome"
-      Edge -> "Microsoft Edge"
-  let url = toLower $ show browser <> "://extensions/"
-  launchAff_ do
-    restartBrowser browserName
-    runInBrowser url enableExtension extensionId
+
+getExtensionsUrl :: Browser -> String
+getExtensionsUrl browser = toLower $ show browser <> "://extensions/"
 
 foreign import enableExtension :: Script Unit
 
@@ -53,17 +55,11 @@ listenExtension (ListenArgs { browser }) = do
   log $ "Listening for changes in extensions for browser " <> show browser
   handleWebSocket { port: webSocketPort } handleMessage
   -- https://chromedevtools.github.io/devtools-protocol/#remote
-  let
-    browserName = case browser of
-      Chrome -> "Google Chrome"
-      Edge -> "Microsoft Edge"
-  let url = toLower $ show browser <> "://extensions/"
   launchAff_ do
-    restartBrowser browserName
-    extensions <- runInBrowser url getAll unit
-    let ids = map _.id extensions
-    let urls = map (\id -> "chrome-extension://" <> id <> "/manifest.json") ids
-    for_ urls $ \url' -> runInBrowser url' addListener { extension: url', webSocket: "ws://localhost:" <> show webSocketPort }
+    restartBrowser browser
+    extensions <- runInBrowser (getExtensionsUrl browser) getAll unit
+    let urls = map (getExtensionUrl <<< _.id) extensions
+    for_ urls $ \url -> runInBrowser url addListener { extension: url, webSocket: "ws://localhost:" <> show webSocketPort }
 
 foreign import handleWebSocket :: Options -> (String -> Effect Unit) -> Effect Unit
 
@@ -84,5 +80,8 @@ decodeToMessage :: String -> Either (NonEmptyList ForeignError) Message
 decodeToMessage = readJSON
 
 foreign import getAll :: Script (Array ExtensionInfo)
+
+getExtensionUrl :: String -> String
+getExtensionUrl id = "chrome-extension://" <> id <> "/manifest.json"
 
 foreign import addListener :: Script Unit

@@ -9,10 +9,14 @@ import Effect.Class (liftEffect)
 import Node.ChildProcess (defaultExecSyncOptions, execSync)
 import Promise (Promise)
 import Promise.Aff (toAffE)
-import Types (PlaywrightBrowser, PlaywrightPage, Script)
+import Types (Browser(..), PlaywrightBrowser, PlaywrightPage, Script)
 
-restartBrowser :: String -> Aff Unit
-restartBrowser browserName = do
+restartBrowser :: Browser -> Aff Unit
+restartBrowser browser = do
+  let
+    browserName = case browser of
+      Chrome -> "Google Chrome"
+      Edge -> "Microsoft Edge"
   running <- liftEffect $ isBrowserRunning browserName
   when running do
     liftEffect $ quitBrowser browserName

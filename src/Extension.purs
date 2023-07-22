@@ -1,4 +1,4 @@
-module Browser where
+module Extension where
 
 import Prelude
 

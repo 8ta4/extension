@@ -23,6 +23,13 @@ import Types (Browser(..), Change, ExtensionInfo, InstallArgs(..), ListenArgs(..
 installExtension :: InstallArgs -> Effect Unit
 installExtension (InstallArgs { browser, extensionId, script }) = do
   log $ "Installing extension " <> extensionId <> " for browser " <> show browser <> " with script " <> show script
+  setupPrefsDirectory browser extensionId
+  launchAff_ do
+    restartBrowser browser
+    runInBrowser (getExtensionsUrl browser) enableExtension extensionId
+
+setupPrefsDirectory :: Browser -> String -> Effect Unit
+setupPrefsDirectory browser extensionId = do
   homeDirectory <- homedir
   -- https://developer.chrome.com/docs/extensions/mv3/external_extensions/#preference-mac
   -- https://learn.microsoft.com/en-us/microsoft-edge/extensions-chromium/developer-guide/alternate-distribution-options#using-a-preferences-json-file-macos-and-linux
@@ -37,9 +44,6 @@ installExtension (InstallArgs { browser, extensionId, script }) = do
   mkdir' extensionDirectory { mode: mkPerms all all all, recursive: true }
   -- copy correct preferences file based on browser
   copyFile' preferencesFileSourcePath preferencesFilePath copyFile_FICLONE
-  launchAff_ do
-    restartBrowser browser
-    runInBrowser (getExtensionsUrl browser) enableExtension extensionId
 
 getExtensionsUrl :: Browser -> String
 getExtensionsUrl browser = toLower $ show browser <> "://extensions/"

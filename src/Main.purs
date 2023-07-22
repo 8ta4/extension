@@ -4,10 +4,10 @@ import Prelude
 
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
+import Extension (installExtension, listenExtension)
 import Options.Applicative (Parser, argument, command, execParser, fullDesc, header, helper, info, maybeReader, progDesc, str, subparser, (<**>))
 import Options.Applicative.Builder (metavar)
 import Options.Applicative.Types (optional)
-import Extension (installExtension, listenExtension)
 import Types (Args(..), Browser(..), InstallArgs(..), ListenArgs(..))
 
 main :: Effect Unit

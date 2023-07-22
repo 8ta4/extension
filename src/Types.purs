@@ -21,6 +21,10 @@ derive instance genericBrowser :: Generic Browser _
 instance showBrowser :: Show Browser where
   show = genericShow
 
+data PlaywrightBrowser
+
+data PlaywrightPage
+
 type Options = { port :: Int }
 
 type Change = { newValue :: Foreign }

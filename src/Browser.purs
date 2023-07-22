@@ -9,7 +9,7 @@ import Effect.Class (liftEffect)
 import Node.ChildProcess (defaultExecSyncOptions, execSync)
 import Promise (Promise)
 import Promise.Aff (toAffE)
-import Types (Script)
+import Types (PlaywrightBrowser, PlaywrightPage, Script)
 
 restartBrowser :: String -> Aff Unit
 restartBrowser browserName = do
@@ -63,10 +63,6 @@ runInBrowser url script scriptArg = do
   _ <- toAffE $ close browser
   pure res
 
-data PlaywrightBrowser
-
-foreign import connectOverCDPImpl :: String -> Effect (Promise PlaywrightBrowser)
-
 connectOverCDP :: String -> Aff PlaywrightBrowser
 connectOverCDP endpointURL = do
   -- Wait for a second and then retry connecting if the initial attempt to connect fails.
@@ -77,13 +73,9 @@ connectOverCDP endpointURL = do
       connectOverCDP endpointURL
     Right browser' -> pure browser'
 
-data PlaywrightPage
+foreign import connectOverCDPImpl :: String -> Effect (Promise PlaywrightBrowser)
 
 foreign import newPage :: PlaywrightBrowser -> String -> Effect (Promise PlaywrightPage)
-
-foreign import evaluateImpl :: forall a b. PlaywrightPage -> Script a -> b -> Effect (Promise a)
-
-foreign import close :: PlaywrightBrowser -> Effect (Promise Unit)
 
 evaluate :: forall a b. PlaywrightPage -> Script a -> b -> Aff a
 evaluate page script scriptArg = do
@@ -93,3 +85,7 @@ evaluate page script scriptArg = do
       delay $ Milliseconds 1000.0
       evaluate page script scriptArg
     Right res' -> pure res'
+
+foreign import evaluateImpl :: forall a b. PlaywrightPage -> Script a -> b -> Effect (Promise a)
+
+foreign import close :: PlaywrightBrowser -> Effect (Promise Unit)

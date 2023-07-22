@@ -15,29 +15,28 @@ export const handleWebSocket = (options) => (handleMessage) => () => {
   });
 };
 
-export const runInBrowserImpl =
-  (endpointURL) => (url) => (script) => (scriptArg) => () =>
-    new Promise(async (resolve, reject) => {
-      let browser;
-      let page;
-      try {
-        browser = await playwright.chromium.connectOverCDP(endpointURL);
-        const defaultContext = browser.contexts()[0];
-        page = await defaultContext.newPage();
-        await page.goto(url);
-        const result = await page.evaluate(script, scriptArg);
-        resolve(result);
-      } catch (e) {
-        if (page) {
-          await page.close();
-        }
-        reject(e);
-      } finally {
-        if (browser) {
-          await browser.close();
-        }
-      }
-    });
+export const connectOverCDPImpl = (endpointURL) => async () => {
+  return await playwright.chromium.connectOverCDP(endpointURL);
+};
+
+export const newPage = (browser) => (url) => async () => {
+  const defaultContext = browser.contexts()[0];
+  const page = await defaultContext.newPage();
+  await page.goto(url);
+  return page;
+};
+
+export const evaluateImpl = (page) => (script) => (scriptArg) => async () => {
+  return await page.evaluate(script, scriptArg);
+};
+
+export const closePage = (page) => async () => {
+  await page.close();
+};
+
+export const closeBrowser = (browser) => async () => {
+  await browser.close();
+};
 
 export const getAll = async () => {
   return await chrome.management.getAll();

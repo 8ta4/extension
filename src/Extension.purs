@@ -88,16 +88,45 @@ decodeToMessage = readJSON
 runInBrowser :: forall a b. String -> Script a -> b -> Aff a
 runInBrowser url script scriptArg = do
   let endpointURL = "http://localhost:" <> show remoteDebuggingPort
+  browser <- connectOverCDP endpointURL
+  page <- toAffE $ newPage browser url
+  res <- evaluate page script scriptArg
+  _ <- toAffE $ closeBrowser browser
+  pure res
+
+data PlaywrightBrowser
+
+foreign import connectOverCDPImpl :: String -> Effect (Promise PlaywrightBrowser)
+
+connectOverCDP :: String -> Aff PlaywrightBrowser
+connectOverCDP endpointURL = do
   -- Wait for a second and then retry connecting if the initial attempt to connect fails.
-  res <- try $ toAffE $ runInBrowserImpl endpointURL url script scriptArg
-  case res of
+  browser <- try $ toAffE $ connectOverCDPImpl endpointURL
+  case browser of
     Left _ -> do
       delay $ Milliseconds 1000.0
-      runInBrowser url script scriptArg
-    Right res' -> do
-      pure res'
+      connectOverCDP endpointURL
+    Right browser' -> pure browser'
 
-foreign import runInBrowserImpl :: forall a b. String -> String -> Script a -> b -> Effect (Promise a)
+data PlaywrightPage
+
+foreign import newPage :: PlaywrightBrowser -> String -> Effect (Promise PlaywrightPage)
+
+foreign import evaluateImpl :: forall a b. PlaywrightPage -> Script a -> b -> Effect (Promise a)
+
+foreign import closePage :: PlaywrightPage -> Effect (Promise Unit)
+
+foreign import closeBrowser :: PlaywrightBrowser -> Effect (Promise Unit)
+
+evaluate :: forall a b. PlaywrightPage -> Script a -> b -> Aff a
+evaluate page script scriptArg = do
+  res <- try $ toAffE $ evaluateImpl page script scriptArg
+  case res of
+    Left _ -> do
+      toAffE $ closePage page
+      delay $ Milliseconds 1000.0
+      evaluate page script scriptArg
+    Right res' -> pure res'
 
 foreign import getAll :: Script (Array ExtensionInfo)
 

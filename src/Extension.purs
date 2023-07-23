@@ -6,6 +6,7 @@ import Browser (restartBrowser, runInBrowser)
 import Data.Either (Either(..))
 import Data.Foldable (for_)
 import Data.List.NonEmpty (NonEmptyList)
+import Data.Maybe (Maybe(..))
 import Data.String (toLower)
 import Data.Tuple (Tuple, fst, snd)
 import Effect (Effect)
@@ -15,14 +16,25 @@ import Foreign (ForeignError)
 import Foreign.Object (toUnfoldable)
 import Node.FS.Constants (copyFile_FICLONE)
 import Node.FS.Perms (all, mkPerms)
-import Node.FS.Sync (copyFile', mkdir')
+import Node.FS.Sync (copyFile', exists, mkdir')
 import Node.OS (homedir)
 import Simple.JSON (readJSON, unsafeStringify)
 import Types (Browser(..), Change, ExtensionInfo, InstallArgs(..), ListenArgs(..), Message, Script, Options)
 
 installExtension :: InstallArgs -> Effect Unit
-installExtension (InstallArgs { browser, extensionId, script }) = do
-  log $ "Installing extension " <> extensionId <> " for browser " <> show browser <> " with script " <> show script
+installExtension (InstallArgs { browser, extensionId, script }) = case script of
+  Nothing -> do
+    log $ "Installing extension " <> extensionId <> " for browser " <> show browser
+    installExtension' browser extensionId
+  Just filePath -> do
+    fileExists <- exists filePath
+    if fileExists then do
+      log $ "Installing extension " <> extensionId <> " for browser " <> show browser <> " with script " <> filePath
+      installExtension' browser extensionId
+    else log $ "Script file " <> filePath <> " does not exist"
+
+installExtension' :: Browser -> String -> Effect Unit
+installExtension' browser extensionId = do
   setupPrefsDirectory browser extensionId
   launchAff_ do
     restartBrowser browser

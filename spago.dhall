@@ -26,6 +26,7 @@ to generate this file without the comments in this block.
   , "node-child-process"
   , "node-fs"
   , "node-os"
+  , "node-process"
   , "optparse"
   , "prelude"
   , "simple-json"

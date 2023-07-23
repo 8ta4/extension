@@ -18,6 +18,7 @@ import Node.FS.Constants (copyFile_FICLONE)
 import Node.FS.Perms (all, mkPerms)
 import Node.FS.Sync (copyFile', exists, mkdir')
 import Node.OS (homedir)
+import Node.Process (exit)
 import Simple.JSON (readJSON, unsafeStringify)
 import Types (Browser(..), Change, ExtensionInfo, InstallArgs(..), ListenArgs(..), Message, Script, Options)
 
@@ -31,7 +32,9 @@ installExtension (InstallArgs { browser, extensionId, script }) = case script of
     if fileExists then do
       log $ "Installing extension " <> extensionId <> " for browser " <> show browser <> " with script " <> filePath
       installExtension' browser extensionId
-    else log $ "Script file " <> filePath <> " does not exist"
+    else do
+      log $ "Script file " <> filePath <> " does not exist"
+      exit 1
 
 installExtension' :: Browser -> String -> Effect Unit
 installExtension' browser extensionId = do

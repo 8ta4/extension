@@ -2,31 +2,57 @@ module Extension where
 
 import Prelude
 
-import Browser (restartBrowser, runInBrowser)
+import Browser (quitBrowser, restartBrowser, runInBrowser)
 import Data.Either (Either(..))
 import Data.Foldable (for_)
 import Data.List.NonEmpty (NonEmptyList)
+import Data.Maybe (Maybe(..))
 import Data.String (toLower)
 import Data.Tuple (Tuple, fst, snd)
 import Effect (Effect)
-import Effect.Aff (launchAff_)
+import Effect.Aff (Aff, launchAff_)
+import Effect.Class (liftEffect)
 import Effect.Console (log)
 import Foreign (ForeignError)
 import Foreign.Object (toUnfoldable)
+import Node.Encoding (Encoding(..))
 import Node.FS.Constants (copyFile_FICLONE)
 import Node.FS.Perms (all, mkPerms)
-import Node.FS.Sync (copyFile', mkdir')
+import Node.FS.Sync (copyFile', exists, mkdir', readTextFile)
 import Node.OS (homedir)
+import Node.Process (exit)
 import Simple.JSON (readJSON, unsafeStringify)
 import Types (Browser(..), Change, ExtensionInfo, InstallArgs(..), ListenArgs(..), Message, Script, Options)
 
 installExtension :: InstallArgs -> Effect Unit
-installExtension (InstallArgs { browser, extensionId, script }) = do
-  log $ "Installing extension " <> extensionId <> " for browser " <> show browser <> " with script " <> show script
-  setupPrefsDirectory browser extensionId
-  launchAff_ do
-    restartBrowser browser
-    runInBrowser (getExtensionsUrl browser) enableExtension extensionId
+installExtension (InstallArgs { browser, extensionId, script }) = case script of
+  Nothing -> do
+    log $ "Installing extension " <> extensionId <> " for browser " <> show browser
+    launchAff_ do
+      executeInstallation browser extensionId
+      -- We ensure to quit the browser after the installation is complete to avoid exposing debug ports
+      liftEffect $ quitBrowser browser
+  Just filePath -> do
+    fileExists <- exists filePath
+    if fileExists then do
+      scriptContents <- readTextFile UTF8 filePath
+      log $ "Installing extension " <> extensionId <> " for browser " <> show browser <> " with script " <> filePath
+      log $ "Script contents: " <> scriptContents
+      launchAff_ do
+        executeInstallation browser extensionId
+        runInBrowser (getExtensionUrl extensionId) (toScript scriptContents) extensionId
+        -- Quitting the browser at this stage is important because some extension configurations
+        -- (like Dark Reader extension) only take effect after restarting the browser.
+        liftEffect $ quitBrowser browser
+    else do
+      log $ "Script file " <> filePath <> " does not exist"
+      exit 1
+
+executeInstallation :: Browser -> String -> Aff Unit
+executeInstallation browser extensionId = do
+  liftEffect $ setupPrefsDirectory browser extensionId
+  restartBrowser browser
+  runInBrowser (getExtensionsUrl browser) enableExtension extensionId
 
 setupPrefsDirectory :: Browser -> String -> Effect Unit
 setupPrefsDirectory browser extensionId = do
@@ -50,9 +76,17 @@ getExtensionsUrl browser = toLower $ show browser <> "://extensions/"
 
 foreign import enableExtension :: Script Unit
 
+getExtensionUrl :: String -> String
+getExtensionUrl id = "chrome-extension://" <> id <> "/manifest.json"
+
+foreign import toScript :: String -> Script Unit
+
 listenExtension :: ListenArgs -> Effect Unit
 listenExtension (ListenArgs { browser }) = do
   log $ "Listening for changes in extensions for browser " <> show browser
+  log $ "Please manually quit the " <> show browser
+    <> " browser when you're done listening for changes. Not closing the browser might "
+    <> "expose the remote debugging port which is a potential security risk."
   handleWebSocket { port: webSocketPort } handleMessage
   -- https://chromedevtools.github.io/devtools-protocol/#remote
   launchAff_ do
@@ -80,8 +114,5 @@ decodeToMessage :: String -> Either (NonEmptyList ForeignError) Message
 decodeToMessage = readJSON
 
 foreign import getAll :: Script (Array ExtensionInfo)
-
-getExtensionUrl :: String -> String
-getExtensionUrl id = "chrome-extension://" <> id <> "/manifest.json"
 
 foreign import addListener :: Script Unit

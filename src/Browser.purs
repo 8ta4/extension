@@ -11,21 +11,23 @@ import Promise (Promise)
 import Promise.Aff (toAffE)
 import Types (Browser(..), PlaywrightBrowser, PlaywrightPage, Script)
 
+getBrowserName :: Browser -> String
+getBrowserName browser =
+  case browser of
+    Chrome -> "Google Chrome"
+    Edge -> "Microsoft Edge"
+
 restartBrowser :: Browser -> Aff Unit
 restartBrowser browser = do
-  let
-    browserName = case browser of
-      Chrome -> "Google Chrome"
-      Edge -> "Microsoft Edge"
-  running <- liftEffect $ isBrowserRunning browserName
+  running <- liftEffect $ isBrowserRunning browser
   when running do
-    liftEffect $ quitBrowser browserName
-    waitForBrowserToClose browserName
-  liftEffect $ openBrowser browserName
+    liftEffect $ quitBrowser browser
+    waitForBrowserToClose browser
+  liftEffect $ openBrowser browser
 
-isBrowserRunning :: String -> Effect Boolean
-isBrowserRunning browserName = do
-  let command = "pgrep -x '" <> browserName <> "'"
+isBrowserRunning :: Browser -> Effect Boolean
+isBrowserRunning browser = do
+  let command = "pgrep -x '" <> getBrowserName browser <> "'"
   -- pgrep returns an error if it doesn't find any process matching the criteria
   -- Catch the error and return False indicating that the browser is not running
   result <- try $ execSync command defaultExecSyncOptions
@@ -33,9 +35,9 @@ isBrowserRunning browserName = do
     Left _ -> pure false
     Right _ -> pure true
 
-quitBrowser :: String -> Effect Unit
-quitBrowser browserName = do
-  let command = "osascript -e 'quit app \"" <> browserName <> "\"'"
+quitBrowser :: Browser -> Effect Unit
+quitBrowser browser = do
+  let command = "osascript -e 'quit app \"" <> getBrowserName browser <> "\"'"
   runCommand command
 
 runCommand :: String -> Effect Unit
@@ -43,16 +45,19 @@ runCommand command = do
   _ <- execSync command defaultExecSyncOptions
   pure unit
 
-waitForBrowserToClose :: String -> Aff Unit
-waitForBrowserToClose browserName = do
-  running <- liftEffect $ isBrowserRunning browserName
+waitForBrowserToClose :: Browser -> Aff Unit
+waitForBrowserToClose browser = do
+  running <- liftEffect $ isBrowserRunning browser
   when running do
     delay $ Milliseconds 1000.0
-    waitForBrowserToClose browserName
+    waitForBrowserToClose browser
 
-openBrowser :: String -> Effect Unit
-openBrowser browserName = do
-  let command = "open -a '" <> browserName <> "' --args --remote-debugging-port=" <> show remoteDebuggingPort
+openBrowser :: Browser -> Effect Unit
+openBrowser browser = do
+  let
+    command = "open -a '" <> getBrowserName browser
+      <> "' --args --remote-debugging-port="
+      <> show remoteDebuggingPort
   runCommand command
 
 remoteDebuggingPort :: Int

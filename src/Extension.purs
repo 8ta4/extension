@@ -2,7 +2,7 @@ module Extension where
 
 import Prelude
 
-import Browser (restartBrowser, runInBrowser)
+import Browser (quitBrowser, restartBrowser, runInBrowser)
 import Data.Either (Either(..))
 import Data.Foldable (for_)
 import Data.List.NonEmpty (NonEmptyList)
@@ -28,7 +28,9 @@ installExtension :: InstallArgs -> Effect Unit
 installExtension (InstallArgs { browser, extensionId, script }) = case script of
   Nothing -> do
     log $ "Installing extension " <> extensionId <> " for browser " <> show browser
-    launchAff_ $ installExtension' browser extensionId
+    launchAff_ do
+      installExtension' browser extensionId
+      liftEffect $ quitBrowser browser
   Just filePath -> do
     fileExists <- exists filePath
     if fileExists then do
@@ -38,6 +40,7 @@ installExtension (InstallArgs { browser, extensionId, script }) = case script of
       launchAff_ do
         installExtension' browser extensionId
         runInBrowser (getExtensionUrl extensionId) (toScript scriptContents) extensionId
+        liftEffect $ quitBrowser browser
     else do
       log $ "Script file " <> filePath <> " does not exist"
       exit 1

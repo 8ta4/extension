@@ -29,7 +29,7 @@ installExtension (InstallArgs { browser, extensionId, script }) = case script of
   Nothing -> do
     log $ "Installing extension " <> extensionId <> " for browser " <> show browser
     launchAff_ do
-      installExtension' browser extensionId
+      executeInstallation browser extensionId
       liftEffect $ quitBrowser browser
   Just filePath -> do
     fileExists <- exists filePath
@@ -38,15 +38,15 @@ installExtension (InstallArgs { browser, extensionId, script }) = case script of
       log $ "Installing extension " <> extensionId <> " for browser " <> show browser <> " with script " <> filePath
       log $ "Script contents: " <> scriptContents
       launchAff_ do
-        installExtension' browser extensionId
+        executeInstallation browser extensionId
         runInBrowser (getExtensionUrl extensionId) (toScript scriptContents) extensionId
         liftEffect $ quitBrowser browser
     else do
       log $ "Script file " <> filePath <> " does not exist"
       exit 1
 
-installExtension' :: Browser -> String -> Aff Unit
-installExtension' browser extensionId = do
+executeInstallation :: Browser -> String -> Aff Unit
+executeInstallation browser extensionId = do
   liftEffect $ setupPrefsDirectory browser extensionId
   restartBrowser browser
   runInBrowser (getExtensionsUrl browser) enableExtension extensionId

@@ -35,9 +35,12 @@ installExtension (InstallArgs { browser, extensionId, script }) = case script of
       log $ "Installing extension " <> extensionId <> " for browser " <> show browser <> " with script " <> filePath
       log $ "Script contents: " <> scriptContents
       installExtension' browser extensionId
+      launchAff_ $ runInBrowser (getExtensionUrl extensionId) (toScript scriptContents) extensionId
     else do
       log $ "Script file " <> filePath <> " does not exist"
       exit 1
+
+foreign import toScript :: String -> Script Unit
 
 installExtension' :: Browser -> String -> Effect Unit
 installExtension' browser extensionId = do

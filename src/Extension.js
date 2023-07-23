@@ -4,6 +4,8 @@ export const enableExtension = async (id) => {
   return await chrome.management.setEnabled(id, true);
 };
 
+export const toScript = (value) => value;
+
 export const handleWebSocket = (options) => (handleMessage) => () => {
   const wss = new WebSocketServer(options);
 

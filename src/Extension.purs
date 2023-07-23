@@ -30,6 +30,7 @@ installExtension (InstallArgs { browser, extensionId, script }) = case script of
     log $ "Installing extension " <> extensionId <> " for browser " <> show browser
     launchAff_ do
       executeInstallation browser extensionId
+      -- We ensure to quit the browser after the installation is complete to avoid exposing debug ports
       liftEffect $ quitBrowser browser
   Just filePath -> do
     fileExists <- exists filePath
@@ -40,6 +41,8 @@ installExtension (InstallArgs { browser, extensionId, script }) = case script of
       launchAff_ do
         executeInstallation browser extensionId
         runInBrowser (getExtensionUrl extensionId) (toScript scriptContents) extensionId
+        -- Quitting the browser at this stage is important because some extension configurations
+        -- (like Dark Reader extension) only take effect after restarting the browser.
         liftEffect $ quitBrowser browser
     else do
       log $ "Script file " <> filePath <> " does not exist"

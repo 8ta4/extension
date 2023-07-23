@@ -84,6 +84,9 @@ foreign import toScript :: String -> Script Unit
 listenExtension :: ListenArgs -> Effect Unit
 listenExtension (ListenArgs { browser }) = do
   log $ "Listening for changes in extensions for browser " <> show browser
+  log $ "Please manually quit the " <> show browser
+    <> " browser when you're done listening for changes. Not closing the browser might "
+    <> "expose the remote debugging port which is a potential security risk."
   handleWebSocket { port: webSocketPort } handleMessage
   -- https://chromedevtools.github.io/devtools-protocol/#remote
   launchAff_ do

@@ -10,7 +10,8 @@ import Data.Maybe (Maybe(..))
 import Data.String (toLower)
 import Data.Tuple (Tuple, fst, snd)
 import Effect (Effect)
-import Effect.Aff (launchAff_)
+import Effect.Aff (Aff, launchAff_)
+import Effect.Class (liftEffect)
 import Effect.Console (log)
 import Foreign (ForeignError)
 import Foreign.Object (toUnfoldable)
@@ -27,25 +28,25 @@ installExtension :: InstallArgs -> Effect Unit
 installExtension (InstallArgs { browser, extensionId, script }) = case script of
   Nothing -> do
     log $ "Installing extension " <> extensionId <> " for browser " <> show browser
-    installExtension' browser extensionId
+    launchAff_ $ installExtension' browser extensionId
   Just filePath -> do
     fileExists <- exists filePath
     if fileExists then do
       scriptContents <- readTextFile UTF8 filePath
       log $ "Installing extension " <> extensionId <> " for browser " <> show browser <> " with script " <> filePath
       log $ "Script contents: " <> scriptContents
-      installExtension' browser extensionId
-      launchAff_ $ runInBrowser (getExtensionUrl extensionId) (toScript scriptContents) extensionId
+      launchAff_ do
+        installExtension' browser extensionId
+        runInBrowser (getExtensionUrl extensionId) (toScript scriptContents) extensionId
     else do
       log $ "Script file " <> filePath <> " does not exist"
       exit 1
 
-installExtension' :: Browser -> String -> Effect Unit
+installExtension' :: Browser -> String -> Aff Unit
 installExtension' browser extensionId = do
-  setupPrefsDirectory browser extensionId
-  launchAff_ do
-    restartBrowser browser
-    runInBrowser (getExtensionsUrl browser) enableExtension extensionId
+  liftEffect $ setupPrefsDirectory browser extensionId
+  restartBrowser browser
+  runInBrowser (getExtensionsUrl browser) enableExtension extensionId
 
 setupPrefsDirectory :: Browser -> String -> Effect Unit
 setupPrefsDirectory browser extensionId = do

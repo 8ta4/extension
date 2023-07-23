@@ -40,8 +40,6 @@ installExtension (InstallArgs { browser, extensionId, script }) = case script of
       log $ "Script file " <> filePath <> " does not exist"
       exit 1
 
-foreign import toScript :: String -> Script Unit
-
 installExtension' :: Browser -> String -> Effect Unit
 installExtension' browser extensionId = do
   setupPrefsDirectory browser extensionId
@@ -70,6 +68,11 @@ getExtensionsUrl :: Browser -> String
 getExtensionsUrl browser = toLower $ show browser <> "://extensions/"
 
 foreign import enableExtension :: Script Unit
+
+getExtensionUrl :: String -> String
+getExtensionUrl id = "chrome-extension://" <> id <> "/manifest.json"
+
+foreign import toScript :: String -> Script Unit
 
 listenExtension :: ListenArgs -> Effect Unit
 listenExtension (ListenArgs { browser }) = do
@@ -101,8 +104,5 @@ decodeToMessage :: String -> Either (NonEmptyList ForeignError) Message
 decodeToMessage = readJSON
 
 foreign import getAll :: Script (Array ExtensionInfo)
-
-getExtensionUrl :: String -> String
-getExtensionUrl id = "chrome-extension://" <> id <> "/manifest.json"
 
 foreign import addListener :: Script Unit

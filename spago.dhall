@@ -23,6 +23,7 @@ to generate this file without the comments in this block.
   , "js-promise-aff"
   , "lists"
   , "maybe"
+  , "node-buffer"
   , "node-child-process"
   , "node-fs"
   , "node-os"

@@ -14,9 +14,10 @@ import Effect.Aff (launchAff_)
 import Effect.Console (log)
 import Foreign (ForeignError)
 import Foreign.Object (toUnfoldable)
+import Node.Encoding (Encoding(..))
 import Node.FS.Constants (copyFile_FICLONE)
 import Node.FS.Perms (all, mkPerms)
-import Node.FS.Sync (copyFile', exists, mkdir')
+import Node.FS.Sync (copyFile', exists, mkdir', readTextFile)
 import Node.OS (homedir)
 import Node.Process (exit)
 import Simple.JSON (readJSON, unsafeStringify)
@@ -30,7 +31,9 @@ installExtension (InstallArgs { browser, extensionId, script }) = case script of
   Just filePath -> do
     fileExists <- exists filePath
     if fileExists then do
+      scriptContents <- readTextFile UTF8 filePath
       log $ "Installing extension " <> extensionId <> " for browser " <> show browser <> " with script " <> filePath
+      log $ "Script contents: " <> scriptContents
       installExtension' browser extensionId
     else do
       log $ "Script file " <> filePath <> " does not exist"

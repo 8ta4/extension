@@ -1,4 +1,10 @@
+import appRoot from "app-root-path";
 import { WebSocketServer } from "ws";
+
+export const getAppRootPath = () => {
+  // https://github.com/inxilpro/node-app-root-path/blob/baf711a6ec61acf50aeb42fb6e5118e899bcbe4b/README.md?plain=1#L24
+  return appRoot.toString();
+};
 
 export const enableExtension = async (id) => {
   return await chrome.management.setEnabled(id, true);

@@ -57,19 +57,22 @@ executeInstallation browser extensionId = do
 setupPrefsDirectory :: Browser -> String -> Effect Unit
 setupPrefsDirectory browser extensionId = do
   homeDirectory <- homedir
+  appRootPath <- getAppRootPath
   -- https://developer.chrome.com/docs/extensions/mv3/external_extensions/#preference-mac
   -- https://learn.microsoft.com/en-us/microsoft-edge/extensions-chromium/developer-guide/alternate-distribution-options#using-a-preferences-json-file-macos-and-linux
   let
     extensionDirectory = case browser of
       Chrome -> homeDirectory <> "/Library/Application Support/Google/Chrome/External Extensions"
       Edge -> homeDirectory <> "/Library/Application Support/Microsoft Edge/External Extensions"
-  let preferencesFileSourcePath = "preferences/" <> toLower (show browser) <> ".json"
+  let preferencesFileSourcePath = appRootPath <> "/preferences/" <> toLower (show browser) <> ".json"
   let preferencesFilePath = extensionDirectory <> "/" <> extensionId <> ".json"
   -- https://github.com/purescript-node/purescript-node-fs/blob/5414a5019bf37a0a2d06514d15c51c61aee33c4a/src/Node/FS/Sync.purs#L234
   -- create directory, if it doesn't exist
   mkdir' extensionDirectory { mode: mkPerms all all all, recursive: true }
   -- copy correct preferences file based on browser
   copyFile' preferencesFileSourcePath preferencesFilePath copyFile_FICLONE
+
+foreign import getAppRootPath :: Effect String
 
 getExtensionsUrl :: Browser -> String
 getExtensionsUrl browser = toLower $ show browser <> "://extensions/"

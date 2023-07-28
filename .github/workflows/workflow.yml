@@ -6,7 +6,7 @@ on:
   push:
 
 jobs:
-  tests:
+  job:
     strategy:
       matrix:
         os: [macos-latest]

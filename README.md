@@ -12,11 +12,10 @@ The `extension` command installs and configures browser extensions. It extends y
 
 First off, you need Homebrew. If you don't have it already, you can find the instructions on the [Homebrew website](https://brew.sh/).
 
-Once you've got Homebrew, just enter these commands in your terminal:
+Once you've got Homebrew, just enter this command in your terminal:
 
 ```sh
-brew tap 8ta4/extension
-brew install extension
+brew install 8ta4/extension/extension
 ```
 
 ## Usage

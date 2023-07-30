@@ -42,7 +42,7 @@ quitBrowser browser = do
 
 runCommand :: String -> Effect Unit
 runCommand command = do
-  _ <- execSync command defaultExecSyncOptions
+  _ <- try $ execSync command defaultExecSyncOptions
   pure unit
 
 waitForBrowserToClose :: Browser -> Aff Unit

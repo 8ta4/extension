@@ -42,7 +42,11 @@ quitBrowser browser = do
 
 runCommand :: String -> Effect Unit
 runCommand command = do
-  _ <- execSync command defaultExecSyncOptions
+  -- The execSync command is wrapped in a try block to handle any errors that might occur when running the command.
+  -- This change was made to handle errors like "Google Chrome got an error: User canceled. (-128)" that were causing the program to crash.
+  -- This error occurred when Chrome was freshly installed and hadn't been set up yet.
+  -- Now, if an error occurs, it will be caught and handled by the try block, preventing the program from crashing.
+  _ <- try $ execSync command defaultExecSyncOptions
   pure unit
 
 waitForBrowserToClose :: Browser -> Aff Unit

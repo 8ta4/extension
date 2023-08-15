@@ -111,7 +111,7 @@ handleMessage receivedMessage = do
     Right decodedMessage' -> do
       log $ _.url decodedMessage'
       let changeArray = toUnfoldable $ _.changes decodedMessage' :: Array (Tuple String Change)
-      for_ changeArray \change -> log $ "chrome.storage." <> _.areaName decodedMessage' <> ".set({" <> fst change <> ": " <> unsafeStringify (_.newValue $ snd change) <> "});"
+      for_ changeArray \change -> log $ "chrome.storage." <> _.areaName decodedMessage' <> ".set({\"" <> fst change <> "\": " <> unsafeStringify (_.newValue $ snd change) <> "});"
 
 decodeToMessage :: String -> Either (NonEmptyList ForeignError) Message
 decodeToMessage = readJSON

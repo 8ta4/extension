@@ -1,3 +1,4 @@
 inputs:
   nixpkgs:
+    # TODO: Use the stable channel instead of the unstable one
     url: github:NixOS/nixpkgs/nixpkgs-unstable

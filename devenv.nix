@@ -7,6 +7,7 @@
   # https://devenv.sh/packages/
   packages = [
     pkgs.git
+    pkgs.gitleaks
     pkgs.yarn
   ];
 
@@ -35,6 +36,11 @@
   # https://devenv.sh/pre-commit-hooks/
   # pre-commit.hooks.shellcheck.enable = true;
   pre-commit.hooks = {
+    gitleaks = {
+      enable = true;
+      # https://github.com/gitleaks/gitleaks/blob/8de8938ad425d11edb0986c38890116525a36035/.pre-commit-hooks.yaml#L4C10-L4C54
+      entry = "${pkgs.gitleaks}/bin/gitleaks protect --verbose --redact --staged";
+    };
     nixpkgs-fmt.enable = true;
     prettier.enable = true;
     purs-tidy.enable = true;

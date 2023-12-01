@@ -8,13 +8,12 @@
   packages = [
     pkgs.git
     pkgs.gitleaks
-    pkgs.yarn
   ];
 
   # https://devenv.sh/scripts/
   scripts.hello.exec = "echo hello from $GREET";
   scripts.build.exec = ''
-    ${pkgs.yarn}/bin/yarn install
+    ${pkgs.nodePackages.npm}/bin/npm install
     ${pkgs.spago}/bin/spago build
   '';
   scripts.run.exec = ''
@@ -30,7 +29,6 @@
 
   # https://devenv.sh/languages/
   # languages.nix.enable = true;
-  languages.javascript.enable = true;
   languages.purescript.enable = true;
 
   # https://devenv.sh/pre-commit-hooks/

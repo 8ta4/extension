@@ -31,6 +31,7 @@ export const addListener = (scriptArg) => {
   const socket = new WebSocket(scriptArg.webSocket);
 
   // https://developer.chrome.com/docs/extensions/reference/storage/#event-onChanged#method-onChanged-callback
+  // TODO: Handle case where chrome.storage is undefined. For example, the Old Reddit Redirect extension (https://github.com/tom-james-watson/old-reddit-redirect) may cause this issue.
   chrome.storage.onChanged.addListener((changes, areaName) => {
     socket.send(
       JSON.stringify({

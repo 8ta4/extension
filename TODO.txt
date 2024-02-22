@@ -1,1 +1,2 @@
-Set up ESLint and Prettier
+Set up ESLint and Prettier.
+Add .prettierrc.js configuration file with prettier-plugin-packagejson plugin.

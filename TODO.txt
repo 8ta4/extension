@@ -1,2 +1,3 @@
+Eliminate extra blank lines before comments.
 Set up ESLint and Prettier.
 Add .prettierrc.js configuration file with prettier-plugin-packagejson plugin.

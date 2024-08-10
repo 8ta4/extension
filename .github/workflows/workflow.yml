@@ -9,19 +9,18 @@ jobs:
   job:
     strategy:
       matrix:
-        os: [macos-latest]
+        os: [macos-14]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # pin@v3
-      - uses: cachix/install-nix-action@6ed004b9ccb68dbc28e7c85bee15fa93dbd214ac # pin@v22
-      - uses: cachix/cachix-action@6a9a34cdd93d0ae4b4b59fd678660efb08109f2f # pin@v12
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # pin@v4
+      - uses: cachix/install-nix-action@8887e596b4ee1134dae06b98d573bd674693f47c # pin@v26
+      - uses: cachix/cachix-action@18cf96c7c98e048e10a83abd92116114cd8504be # pin@v14
         with:
           name: devenv
       - name: Install devenv.sh
-        run: nix profile install tarball+https://install.devenv.sh/latest
-        shell: sh
-      - run: devenv ci
-      - run: devenv shell echo ok
+        run: nix profile install nixpkgs#devenv
+      - run: devenv test
+      - run: devenv shell hello
       - run: devenv shell build
       - run: tar -czvf extension.tar.gz .
       # https://github.com/softprops/action-gh-release/blob/c9b46fe7aad9f02afd89b12450b780f52dacfb2d/README.md?plain=1#L45-L47

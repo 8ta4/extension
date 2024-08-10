@@ -12,10 +12,7 @@
 
   # https://devenv.sh/scripts/
   scripts.hello.exec = "echo hello from $GREET";
-  scripts.build.exec = ''
-    ${pkgs.nodePackages.npm}/bin/npm install
-    ${pkgs.spago}/bin/spago build
-  '';
+  scripts.build.exec = "spago build";
   scripts.run.exec = ''
     command="$@"
     spago run -wb "$command"
@@ -24,6 +21,8 @@
   enterShell = ''
     hello
     git --version
+    export PATH="$DEVENV_ROOT/node_modules/.bin:$PATH"
+    npm install
     # TODO: Incorporate dependency installation via enterShell
   '';
 

@@ -4,7 +4,7 @@
 
 > What does the `extension` command do?
 
-The `extension` command installs and configures browser extensions. It extends your lifespan by saving 10 seconds, unless you have OCD, in which case you lose 10 years.
+The `extension` command installs and configures browser extensions.
 
 ## Installation
 
@@ -70,7 +70,7 @@ If the extension is already installed, `extension` will just apply the configura
 
 > How can I use the `extension` command with Edge?
 
-For example, let's say you want to enjoy a dark mode on any website with the [Dark Reader](https://microsoftedge.microsoft.com/addons/detail/dark-reader/ifoakfbpdcdoeenechcleahebpibofpc) extension. To install it on Edge, your command would look like this:
+For example, let's say you want to enjoy a dark mode on any website with the [Dark Reader](https://microsoftedge.microsoft.com/addons/detail/dark-reader/ifoakfbpdcdoeenechcleahebpibofpc) extension to match your dimwitted nature. I'm just throwing some shade to help you see better. To install it on Edge, your command would look like this:
 
 ```sh
 extension install edge ifoakfbpdcdoeenechcleahebpibofpc

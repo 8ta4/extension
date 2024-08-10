@@ -8,6 +8,9 @@
   packages = [
     pkgs.git
     pkgs.gitleaks
+    # pkgs.spago is not used due to an error encountered during GitHub Actions.
+    # The error was: "Git output: fatal: destination path '.' already exists and is not an empty directory."
+    # Using npm to install spago avoids this issue.
   ];
 
   # https://devenv.sh/scripts/

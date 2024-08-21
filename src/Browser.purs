@@ -14,6 +14,7 @@ import Types (Browser(..), PlaywrightBrowser, PlaywrightPage, Script)
 getBrowserName :: Browser -> String
 getBrowserName browser =
   case browser of
+    Arc -> "Arc"
     Chrome -> "Google Chrome"
     Edge -> "Microsoft Edge"
 

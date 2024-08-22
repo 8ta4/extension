@@ -90,7 +90,7 @@ Most likely not. Even for the same extension, the Edge Add-ons store and the Chr
 
 > Can I use the extension command with Arc?
 
-Yes, you can use the `extension` command with the ARC browser, and it works similarly to Chrome.
+Yes, you can use the `extension` command with the Arc browser, and it works similarly to Chrome.
 
 > Are the IDs for Arc extensions the same as their Chrome counterparts?
 

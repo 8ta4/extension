@@ -88,7 +88,7 @@ Here, `ifoakfbpdcdoeenechcleahebpibofpc` is the ID for the Dark Reader extension
 
 Most likely not. Even for the same extension, the Edge Add-ons store and the Chrome Web Store typically use different IDs.
 
-> Can I use the extension command with Arc?
+> Can I use the extension command with [Arc](https://arc.net)?
 
 Yes, you can use the `extension` command with the Arc browser, and it works similarly to Chrome.
 

@@ -34,6 +34,7 @@ browserArg = argument (maybeReader readBrowser) (metavar "BROWSER")
 
 readBrowser :: String -> Maybe Browser
 readBrowser str = case str of
+  "arc" -> Just Arc
   "chrome" -> Just Chrome
   "edge" -> Just Edge
   _ -> Nothing

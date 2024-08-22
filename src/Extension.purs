@@ -62,6 +62,7 @@ setupPrefsDirectory browser extensionId = do
   -- https://learn.microsoft.com/en-us/microsoft-edge/extensions-chromium/developer-guide/alternate-distribution-options#using-a-preferences-json-file-macos-and-linux
   let
     extensionDirectory = case browser of
+      Arc -> homeDirectory <> "/Library/Application Support/Arc/User Data/External Extensions"
       Chrome -> homeDirectory <> "/Library/Application Support/Google/Chrome/External Extensions"
       Edge -> homeDirectory <> "/Library/Application Support/Microsoft Edge/External Extensions"
   let preferencesFileSourcePath = appRootPath <> "/preferences/" <> toLower (show browser) <> ".json"

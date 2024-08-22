@@ -14,7 +14,7 @@ data InstallArgs = InstallArgs { browser :: Browser, extensionId :: String, scri
 
 data ListenArgs = ListenArgs { browser :: Browser }
 
-data Browser = Chrome | Edge
+data Browser = Arc | Chrome | Edge
 
 derive instance genericBrowser :: Generic Browser _
 

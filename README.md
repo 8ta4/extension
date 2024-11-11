@@ -6,6 +6,8 @@
 
 The `extension` command installs and configures browser extensions.
 
+[![](https://raw.githubusercontent.com/8ta4/extension-media/1dd5d1df59b08a5e9bb3f2b62c240fa05305b414/timeline.gif)](https://youtu.be/67CSvVPK7fA)
+
 ## Installation
 
 > How do I install this tool?

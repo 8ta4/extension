@@ -2,7 +2,7 @@
 
 ## The Extension's Extension
 
-> What does the `extension` command do?
+> What does the `extension` command do? (Blocked)
 
 The `extension` command installs and configures browser extensions.
 
@@ -36,7 +36,7 @@ Here, `install` is the action you want to perform, `chrome` is the browser you w
 
 The ID of a Chrome extension can usually be found in the extension's URL on the Chrome Web Store. It's that long string of alphanumeric characters at the end of the URL.
 
-> What programming language do I use to configure extension settings?
+> What programming language do I use to configure extension settings? (Blocked)
 
 You'll use JavaScript to configure the extension settings.
 
@@ -56,7 +56,7 @@ chrome.storage.sync.set({ audioBoolean: true });
 
 These scripts are designed to be idempotent, meaning they can be run multiple times without causing any unintended changes to your system.
 
-> Is it possible to generate the JavaScript code for my configuration file?
+> Is it possible to generate the JavaScript code for my configuration file? (Blocked)
 
 Absolutely! You can use the listen mode of the `extension` command to generate JavaScript code based on changes it detects. For instance, if you want to see what changes the `Work on audio` setting makes to the Video Speed Controller extension, you would use this command:
 
@@ -68,11 +68,11 @@ In this command, `listen` is the action and `chrome` is the browser you're targe
 
 When the `extension` command is in listen mode, it generates JavaScript code based on changes it detects. This code can be used directly or as a reference to modify your `config.js` file.
 
-> Does this tool have any restrictions on the configuration file's name?
+> Does this tool have any restrictions on the configuration file's name? (Blocked)
 
 No, the `extension` tool doesn't add any extra rules for the configuration file name beyond what your operating system already requires.
 
-> If the extension is already installed, will this tool reinstall it?
+> If the extension is already installed, will this tool reinstall it? (Blocked)
 
 No, it won't reinstall an extension that's already there. If you provide a configuration script, it will only apply the script to the existing extension.
 

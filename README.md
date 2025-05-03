@@ -2,6 +2,8 @@
 
 ## The Extension's Extension
 
+Some features got hit by recent browser security changes. Anything marked (Blocked) below is either partially or fully out of commission right now.
+
 > What does the `extension` command do? (Blocked)
 
 The `extension` command installs and configures browser extensions.

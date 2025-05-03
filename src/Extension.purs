@@ -24,6 +24,7 @@ import Node.Process (exit)
 import Simple.JSON (readJSON, unsafeStringify)
 import Types (Browser(..), Change, ExtensionInfo, InstallArgs(..), ListenArgs(..), Message, Script, Options)
 
+-- Original function to install an extension, including running a setup script via remote debugging.
 installExtension' :: InstallArgs -> Effect Unit
 installExtension' (InstallArgs { browser, extensionId, script }) = case script of
   Nothing -> do
@@ -48,17 +49,20 @@ installExtension' (InstallArgs { browser, extensionId, script }) = case script o
       log $ "Script file " <> filePath <> " does not exist"
       exit 1
 
+-- Original function to perform the core installation steps, including restarting the browser and enabling the extension via remote debugging.
 executeInstallation' :: Browser -> String -> Aff Unit
 executeInstallation' browser extensionId = do
   liftEffect $ setupPrefsDirectory browser extensionId
   restartBrowser browser
   runInBrowser (getExtensionsUrl browser) enableExtension extensionId
 
+-- New install function introduced to work around Chrome 136+ remote debugging restrictions.
 installExtension :: InstallArgs -> Effect Unit
 installExtension (InstallArgs { browser, extensionId, script }) = do
   log $ "Installing extension " <> extensionId <> " for browser " <> show browser
   launchAff_ $ executeInstallation browser extensionId
 
+-- New execution function introduced to work around Chrome 136+ remote debugging restrictions.
 executeInstallation :: Browser -> String -> Aff Unit
 executeInstallation browser extensionId = liftEffect $ setupPrefsDirectory browser extensionId
 

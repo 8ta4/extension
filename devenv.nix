@@ -40,6 +40,9 @@
 
   # https://devenv.sh/git-hooks/
   # git-hooks.hooks.shellcheck.enable = true;
+  git-hooks.hooks = {
+    nixpkgs-fmt.enable = true;
+  };
 
   # See full reference at https://devenv.sh/reference/options/
 }

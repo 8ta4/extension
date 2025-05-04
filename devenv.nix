@@ -11,7 +11,11 @@
   env.GREET = "devenv";
 
   # https://devenv.sh/packages/
-  packages = [ pkgs.git ];
+  packages = [
+    pkgs.bash
+    pkgs.git
+    pkgs.gitleaks
+  ];
 
   # https://devenv.sh/languages/
   # languages.rust.enable = true;
@@ -47,6 +51,12 @@
   # https://devenv.sh/git-hooks/
   # git-hooks.hooks.shellcheck.enable = true;
   git-hooks.hooks = {
+    gitleaks = {
+      enable = true;
+      entry = ''
+        bash -c 'exec gitleaks git --redact --staged --verbose'
+      '';
+    };
     # https://github.com/NixOS/nixfmt/blob/1acdae8b49c1c5d7f22fed7398d7f6f3dbce4c8a/README.md?plain=1#L16
     nixfmt-rfc-style.enable = true;
   };

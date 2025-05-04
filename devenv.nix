@@ -15,6 +15,7 @@
     pkgs.bash
     pkgs.git
     pkgs.gitleaks
+    pkgs.nodejs_22
   ];
 
   # https://devenv.sh/languages/

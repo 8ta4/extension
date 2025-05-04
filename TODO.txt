@@ -1,4 +1,0 @@
-Address the Chrome 136+ remote debugging restriction (https://developer.chrome.com/blog/remote-debugging-port).
-Eliminate extra blank lines before comments.
-Set up ESLint and Prettier.
-Add .prettierrc.js configuration file with prettier-plugin-packagejson plugin.

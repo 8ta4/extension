@@ -17,5 +17,14 @@
   [browser extension-id]
   (io/file (external-extension-paths browser) (str extension-id ".json")))
 
+(defn copy
+  [input output]
+  (io/copy (str input) (str output)))
+
+(defn install-extension-preference-file
+  [browser extension-id]
+  (io/make-parents (get-preference-target-path browser extension-id))
+  (copy (get-preference-source-path browser) (get-preference-target-path browser extension-id)))
+
 (defn main
   [])

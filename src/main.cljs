@@ -26,6 +26,7 @@
 
 (defn install-extension-preference-file
   [browser extension-id]
+  (js/console.log (str "Installing " extension-id " for " browser))
   (io/make-parents (get-preference-target-path browser extension-id))
   (copy (get-preference-source-path browser) (get-preference-target-path browser extension-id)))
 

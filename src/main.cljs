@@ -17,6 +17,9 @@
   [browser extension-id]
   (io/file (external-extension-paths browser) (str extension-id ".json")))
 
+; Directly passing these `io/file` objects to `io/copy` results in an error:
+;   The "src" argument must be of type string or an instance of Buffer or URL. Received an instance of ...
+;   The "dest" argument must be of type string or an instance of Buffer or URL. Received an instance of ...
 (defn copy
   [input output]
   (io/copy (str input) (str output)))

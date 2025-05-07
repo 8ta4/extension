@@ -13,5 +13,9 @@
   [browser]
   (io/file "preferences" (str browser ".json")))
 
+(defn get-preference-target-path
+  [browser extension-id]
+  (io/file (external-extension-paths browser) (str extension-id ".json")))
+
 (defn main
   [])

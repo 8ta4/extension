@@ -1,4 +1,5 @@
-(ns main)
+(ns main
+  (:require [cljs-node-io.core :as io]))
 
 (def external-extension-paths
   {"arc" "/Library/Application Support/Arc/User Data/External Extensions"

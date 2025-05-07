@@ -36,6 +36,7 @@
   enterShell = ''
     hello
     git --version
+    export PATH="$DEVENV_ROOT/node_modules/.bin:$PATH"
   '';
 
   # https://devenv.sh/tasks/

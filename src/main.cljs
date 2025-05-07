@@ -30,4 +30,6 @@
   (copy (get-preference-source-path browser) (get-preference-target-path browser extension-id)))
 
 (defn main
-  [])
+  [& args]
+  (case (first args)
+    "install" (install-extension-preference-file (second args) (nth args 2))))

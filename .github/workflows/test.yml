@@ -24,6 +24,7 @@ jobs:
         run: devenv shell hello
       - run: devenv shell release
       # https://github.com/softprops/action-gh-release/blob/39ba0b9d81217c984acfad95ddcc7db226387497/README.md?plain=1#L55-L57
+      - run: tar -czvf extension.tar.gz .
       - name: Release
         uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631 # v2
         if: github.ref_type == 'tag'

@@ -27,3 +27,7 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631 # v2
         if: github.ref_type == 'tag'
+
+# https://github.com/softprops/action-gh-release/blob/39ba0b9d81217c984acfad95ddcc7db226387497/README.md?plain=1#L232-L237
+permissions:
+  contents: write

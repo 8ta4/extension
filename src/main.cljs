@@ -1,5 +1,6 @@
 (ns main
-  (:require [cljs-node-io.core :as io]
+  (:require [app-root-path]
+            [cljs-node-io.core :as io]
             [os]
             [path]))
 
@@ -12,7 +13,7 @@
 
 (defn get-preference-source-path
   [browser]
-  (path/join "preferences" (str browser ".json")))
+  (path/join (app-root-path/toString) "preferences" (str browser ".json")))
 
 (defn get-preference-target-path
   [browser extension-id]

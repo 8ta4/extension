@@ -8,5 +8,9 @@
 ; https://learn.microsoft.com/en-us/microsoft-edge/extensions-chromium/developer-guide/alternate-distribution-options#using-a-preferences-json-file-macos-and-linux
    "edge" "/Library/Application Support/Microsoft Edge/External Extensions"})
 
+(defn get-preference-source-path
+  [browser]
+  (io/file "preferences" (str browser ".json")))
+
 (defn main
   [])

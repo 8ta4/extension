@@ -32,6 +32,7 @@
   scripts.hello.exec = ''
     echo hello from $GREET
   '';
+  scripts.release.exec = "shadow-cljs release main";
 
   enterShell = ''
     hello

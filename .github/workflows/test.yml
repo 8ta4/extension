@@ -10,18 +10,25 @@ jobs:
       matrix:
         os: [macos-latest]
     runs-on: ${{ matrix.os }}
-
     steps:
-      - uses: actions/checkout@v4
-      - uses: cachix/install-nix-action@v26
-      - uses: cachix/cachix-action@v14
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: cachix/install-nix-action@526118121621777ccd86f79b04685a9319637641 # v31.3.0
+      - uses: cachix/cachix-action@0fc020193b5a1fa3ac4575aa3a7d3aa6a35435ad # v16
         with:
           name: devenv
       - name: Install devenv.sh
         run: nix profile install nixpkgs#devenv
-
       - name: Build the devenv shell and run any pre-commit hooks
         run: devenv test
-
       - name: Run a single command in the devenv shell
         run: devenv shell hello
+      - run: devenv shell release
+      # https://github.com/softprops/action-gh-release/blob/39ba0b9d81217c984acfad95ddcc7db226387497/README.md?plain=1#L55-L57
+      - run: tar -czvf extension.tar.gz .
+      - name: Release
+        uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631 # v2
+        if: github.ref_type == 'tag'
+
+# https://github.com/softprops/action-gh-release/blob/39ba0b9d81217c984acfad95ddcc7db226387497/README.md?plain=1#L232-L237
+permissions:
+  contents: write

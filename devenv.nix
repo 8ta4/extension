@@ -32,10 +32,13 @@
   scripts.hello.exec = ''
     echo hello from $GREET
   '';
+  scripts.release.exec = "shadow-cljs release main";
 
   enterShell = ''
     hello
     git --version
+    export PATH="$DEVENV_ROOT/node_modules/.bin:$PATH"
+    npm i
   '';
 
   # https://devenv.sh/tasks/

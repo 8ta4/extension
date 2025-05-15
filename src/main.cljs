@@ -45,6 +45,10 @@
 (def app-temp-directory
   (fs/mkdtempSync (path/join temp-directory "extension-")))
 
+(defn copy
+  [source target]
+  (fs/cpSync source target (clj->js {:recursive true})))
+
 (defn main
   [& args]
   (case (first args)

@@ -49,6 +49,16 @@
   [source target]
   (fs/cpSync source target (clj->js {:recursive true})))
 
+(def browser-user-data-paths
+  {"arc" (path/join (os/homedir) "Library/Application Support/Arc/User Data")
+; https://chromium.googlesource.com/chromium/src/+/main/docs/user_data_dir.md#:~:text=%5BChrome%5D%20~/Library/Application%20Support/Google/Chrome
+   "chrome" (path/join (os/homedir) "Library/Application Support/Google/Chrome")
+   "edge" (path/join (os/homedir) "Library/Application Support/Microsoft Edge")})
+
+(defn clone-user-data
+  [browser]
+  (copy (browser-user-data-paths browser) app-temp-directory))
+
 (defn main
   [& args]
   (case (first args)

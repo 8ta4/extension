@@ -1,6 +1,7 @@
 (ns main
   (:require ["child_process" :as child-process]
             [cljs-node-io.core :as io]
+            [fs]
             [os]
             [path]
             [app-root-path]))
@@ -37,6 +38,12 @@
 
 (def quit-browser
   (comp child-process/execSync get-quit-command))
+
+(def temp-directory
+  (os/tmpdir))
+
+(def app-temp-directory
+  (fs/mkdtempSync (path/join temp-directory "extension-")))
 
 (defn main
   [& args]

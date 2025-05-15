@@ -1,8 +1,9 @@
 (ns main
-  (:require [app-root-path]
+  (:require ["child_process" :as child-process]
             [cljs-node-io.core :as io]
             [os]
-            [path]))
+            [path]
+            [app-root-path]))
 
 (def external-extension-paths
   {"arc" (path/join (os/homedir) "Library/Application Support/Arc/User Data/External Extensions")
@@ -24,6 +25,18 @@
   (js/console.log (str "Installing " extension-id " for " browser))
   (io/make-parents (get-preference-target-path browser extension-id))
   (io/copy (get-preference-source-path browser) (get-preference-target-path browser extension-id)))
+
+(def browser-app-names
+  {"arc" "Arc"
+   "chrome" "Google Chrome"
+   "edge" "Microsoft Edge"})
+
+(defn get-quit-command
+  [browser]
+  (str "osascript -e 'quit app \"" (browser-app-names browser) "\"'"))
+
+(def quit-browser
+  (comp child-process/execSync get-quit-command))
 
 (defn main
   [& args]

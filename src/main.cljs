@@ -6,7 +6,7 @@
             [path]
             [app-root-path]))
 
-(def external-extension-paths
+(def browser-external-extension-paths
   {"arc" (path/join (os/homedir) "Library/Application Support/Arc/User Data/External Extensions")
 ; https://developer.chrome.com/docs/extensions/mv3/external_extensions/#preference-mac
    "chrome" (path/join (os/homedir) "Library/Application Support/Google/Chrome/External Extensions")
@@ -19,7 +19,7 @@
 
 (defn get-preference-target-path
   [browser extension-id]
-  (path/join (external-extension-paths browser) (str extension-id ".json")))
+  (path/join (browser-external-extension-paths browser) (str extension-id ".json")))
 
 (defn install-extension-preference-file
   [browser extension-id]

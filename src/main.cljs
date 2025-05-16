@@ -59,6 +59,16 @@
   [browser]
   (copy (browser-user-data-paths browser) app-temp-directory))
 
+(def remote-debugging-port
+  "9222")
+
+(defn get-launch-command
+  [browser]
+  (str "open -a '" (browser-app-names browser) "' --args --remote-debugging-port=" remote-debugging-port))
+
+(def launch-browser
+  (comp child-process/execSync get-launch-command))
+
 (defn main
   [& args]
   (case (first args)

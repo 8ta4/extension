@@ -1,5 +1,7 @@
 (ns main
   (:require ["child_process" :as child-process]
+            ["playwright" :as playwright]
+            [shadow.cljs.modern :refer [js-await]]
             [cljs-node-io.core :as io]
             [fs]
             [os]
@@ -64,10 +66,14 @@
 
 (defn get-launch-command
   [browser]
-  (str "open -a '" (browser-app-names browser) "' --args --remote-debugging-port=" remote-debugging-port))
+  (str "open -a '" (browser-app-names browser) "' --args --remote-debugging-port=" remote-debugging-port " --user-data-dir=" app-temp-directory))
 
 (def launch-browser
   (comp child-process/execSync get-launch-command))
+
+(defn connect-browser
+  []
+  (playwright/chromium.connectOverCDP (str "http://localhost:" remote-debugging-port)))
 
 (defn main
   [& args]

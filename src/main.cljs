@@ -75,6 +75,16 @@
   []
   (playwright/chromium.connectOverCDP (str "http://localhost:" remote-debugging-port)))
 
+(defn get-manifest-url
+  [id]
+  (str "chrome-extension://" id "/manifest.json"))
+
+(defn load-manifest-page
+  [id]
+  (js-await [browser (connect-browser)]
+            (js-await [page (.newPage (first (.contexts browser)))]
+                      (js-await [_ (.goto page (get-manifest-url id))]))))
+
 (defn main
   [& args]
   (case (first args)

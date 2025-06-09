@@ -79,11 +79,15 @@
   [id]
   (str "chrome-extension://" id "/manifest.json"))
 
+(def init-path
+  (path/join (app-root-path/toString) "public/js/init.js"))
+
 (defn load-manifest-page
   [id]
   (js-await [browser (connect-browser)]
             (js-await [page (.newPage (first (.contexts browser)))]
-                      (js-await [_ (.goto page (get-manifest-url id))]))))
+                      (js-await [_ (.addInitScript page (clj->js {:path init-path}))]
+                                (js-await [_ (.goto page (get-manifest-url id))])))))
 
 (defn main
   [& args]

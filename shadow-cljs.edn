@@ -6,6 +6,8 @@
  [[com.github.pkpkpk/cljs-node-io "2.0.339"]]
 
  :builds
- {:main {:target :node-script
+ {:init {:target :browser
+         :modules {:init {}}}
+  :main {:target :node-script
          :main main/main
          :output-to "main.js"}}}

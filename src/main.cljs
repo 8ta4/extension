@@ -6,7 +6,7 @@
             [os :refer [homedir tmpdir]]
             [path :refer [join]]
             [playwright :refer [chromium]]
-            [shadow.cljs.modern :refer [js-await]]))
+            [promesa.core :as promesa]))
 
 (def browser-external-extension-paths
   {"arc" (join (homedir) "Library/Application Support/Arc/User Data/External Extensions")
@@ -80,10 +80,13 @@
 
 (defn load-manifest-page
   [id]
-  (js-await [browser (connect-browser)]
-            (js-await [page (.newPage (first (.contexts browser)))]
-                      (js-await [_ (.addInitScript page (clj->js {:path init-path}))]
-                                (js-await [_ (.goto page (get-manifest-url id))])))))
+  (promesa/let [browser (.connectOverCDP chromium (str "http://localhost:" remote-debugging-port))
+                page (-> browser
+                         .contexts
+                         first
+                         .newPage)]
+    (.addInitScript page (clj->js {:path init-path}))
+    (.goto page (get-manifest-url id))))
 
 (defn main
   [& args]

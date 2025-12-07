@@ -1,12 +1,13 @@
 (ns main
-  (:require [app-root-path :refer [toString]]
-            [child_process :refer [execSync]]
-            [cljs-node-io.core :refer [make-parents]]
-            [fs :refer [mkdtempSync cpSync]]
-            [os :refer [homedir tmpdir]]
-            [path :refer [join]]
-            [playwright :refer [chromium]]
-            [promesa.core :as promesa]))
+  (:require
+   [app-root-path :refer [toString]]
+   [child_process :refer [execSync]]
+   [cljs-node-io.core :refer [make-parents slurp]]
+   [fs :refer [cpSync mkdtempSync]]
+   [os :refer [homedir tmpdir]]
+   [path :refer [join]]
+   [playwright :refer [chromium]]
+   [promesa.core :as promesa]))
 
 (def browser-external-extension-paths
   {"arc" (join (homedir) "Library/Application Support/Arc/User Data/External Extensions")
@@ -101,5 +102,5 @@
     "install" (install {:browser (second args)
                         :id (nth args 2)
                         :script (if (> (count args) 3)
-                                  (nth args 3)
+                                  (slurp (nth args 3))
                                   "console.log('No script provided')")})))

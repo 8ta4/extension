@@ -67,10 +67,6 @@
 (def launch-browser
   (comp execSync get-launch-command))
 
-(defn connect-browser
-  []
-  (.connectOverCDP chromium (str "http://localhost:" remote-debugging-port)))
-
 (defn get-manifest-url
   [id]
   (str "chrome-extension://" id "/manifest.json"))
@@ -78,7 +74,11 @@
 (def init-path
   (join (toString) "public/js/init.js"))
 
-(defn load-manifest-page
+(defn enable-extension
+  [id]
+  (js/chrome.management.setEnabled id true))
+
+(defn install-extension-in-browser
   [id]
   (promesa/let [browser (.connectOverCDP chromium (str "http://localhost:" remote-debugging-port))
                 page (-> browser
@@ -86,7 +86,8 @@
                          first
                          .newPage)]
     (.addInitScript page (clj->js {:path init-path}))
-    (.goto page (get-manifest-url id))))
+    (.goto page "chrome://extensions")
+    (.evaluate page enable-extension id)))
 
 (defn main
   [& args]

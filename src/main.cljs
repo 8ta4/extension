@@ -79,7 +79,7 @@
   (js/chrome.management.setEnabled id true))
 
 (defn install-extension-in-browser
-  [id]
+  [id script]
   (promesa/let [browser (.connectOverCDP chromium (str "http://localhost:" remote-debugging-port))
                 page (-> browser
                          .contexts
@@ -87,9 +87,19 @@
                          .newPage)]
     (.addInitScript page (clj->js {:path init-path}))
     (.goto page "chrome://extensions")
-    (.evaluate page enable-extension id)))
+    (.evaluate page enable-extension id)
+    (.evaluate page script)))
+
+(defn install
+  [{:keys [browser id script]}]
+  (install-extension-preference-file browser id)
+  (install-extension-in-browser id script))
 
 (defn main
   [& args]
   (case (first args)
-    "install" (install-extension-preference-file (second args) (nth args 2))))
+    "install" (install {:browser (second args)
+                        :id (nth args 2)
+                        :script (if (> (count args) 3)
+                                  (nth args 3)
+                                  "console.log('No script provided')")})))

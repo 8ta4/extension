@@ -6,6 +6,7 @@
    [clojure.edn :refer [read-string]]
    [core :refer [port]]
    [fs :refer [cpSync mkdtempSync renameSync rmSync]]
+   [mount.core :refer [defstate start]]
    [os :refer [homedir tmpdir]]
    [path :refer [join]]
    [playwright :refer [chromium]]
@@ -149,15 +150,19 @@
     (.goto page (get-manifest-url id))
     (.evaluate page (slurp init-path))))
 
+(defstate server
+  :start (.on (WebSocketServer. (clj->js {:port port}))
+              "connection"
+              (fn [socket]
+                (.on socket "message"
+                     (fn [message]
+                       (println (read-string (.toString message)))))))
+  :stop (.close server))
+
 (defn listen
   [browser]
   (relaunch-browser browser)
-  (.on (WebSocketServer. (clj->js {:port port}))
-       "connection"
-       (fn [socket]
-         (.on socket "message"
-              (fn [message]
-                (println (read-string (.toString message)))))))
+  (start)
   (promesa/let [extensions (get-extensions)]
     (run! (comp listen-extension :id) (js->clj extensions :keywordize-keys true))))
 

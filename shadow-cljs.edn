@@ -4,7 +4,8 @@
 
  :dependencies
  [[com.github.pkpkpk/cljs-node-io "2.0.339"]
-  [funcool/promesa "11.0.678"]]
+  [funcool/promesa "11.0.678"]
+  [mount "0.1.23"]]
 
  :builds
  {:listener {:devtools {:use-document-host false}

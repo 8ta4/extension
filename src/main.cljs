@@ -128,6 +128,12 @@
               (install-extension-in-browser id script)
               (quit-browser browser)))
 
+(defn get-extensions
+  []
+  (promesa/let [page (get-page)]
+    (.goto page "chrome://extensions")
+    (.evaluate page #(js/chrome.management.getAll))))
+
 (defn listen-extension
   [id]
   (promesa/let [page (get-page)]

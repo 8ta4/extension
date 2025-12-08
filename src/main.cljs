@@ -3,7 +3,7 @@
    [app-root-path :refer [toString]]
    [child_process :refer [execSync]]
    [cljs-node-io.core :refer [make-parents slurp]]
-   [fs :refer [cpSync mkdtempSync]]
+   [fs :refer [cpSync mkdtempSync renameSync rmSync]]
    [os :refer [homedir tmpdir]]
    [path :refer [join]]
    [playwright :refer [chromium]]
@@ -65,9 +65,14 @@
    "chrome" (join (homedir) "Library/Application Support/Google/Chrome")
    "edge" (join (homedir) "Library/Application Support/Microsoft Edge")})
 
-(defn clone-user-data
+(defn stage-user-data
   [browser]
   (cpSync (browser-user-data-paths browser) app-temp-directory (clj->js {:recursive true})))
+
+(defn commit-user-data
+  [browser]
+  (rmSync (browser-user-data-paths browser) (clj->js {:recursive true}))
+  (renameSync app-temp-directory (browser-user-data-paths browser) (clj->js {:recursive true})))
 
 (def remote-debugging-port
   "9222")
@@ -118,7 +123,7 @@
 (defn relaunch-browser
   [browser]
   (promesa/do (quit-browser browser)
-              (clone-user-data browser)
+              (stage-user-data browser)
               (launch-browser browser)))
 
 (defn install
@@ -126,7 +131,8 @@
   (install-extension-preference-file browser id)
   (promesa/do (relaunch-browser browser)
               (install-extension-in-browser id script)
-              (quit-browser browser)))
+              (quit-browser browser)
+              (commit-user-data browser)))
 
 (defn get-extensions
   []

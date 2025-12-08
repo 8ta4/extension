@@ -123,7 +123,12 @@
 (defn install
   [{:keys [browser id script]}]
   (install-extension-preference-file browser id)
-  (install-extension-in-browser id script))
+  (quit-browser browser)
+  (promesa/do (wait-for-browser-exit browser)
+              (clone-user-data browser)
+              (launch-browser browser)
+              (install-extension-in-browser id script)
+              (quit-browser browser)))
 
 (defn main
   [& args]

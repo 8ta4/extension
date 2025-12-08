@@ -79,24 +79,25 @@
   [id]
   (js/chrome.management.setEnabled id true))
 
+(defn get-page
+  []
+  (promesa/->> remote-debugging-port
+               (str "http://localhost:")
+               (.connectOverCDP chromium)
+               .contexts
+               first
+               .newPage))
+
 (defn install-extension-in-browser
   [id script]
-  (promesa/let [browser (.connectOverCDP chromium (str "http://localhost:" remote-debugging-port))
-                page (-> browser
-                         .contexts
-                         first
-                         .newPage)]
+  (promesa/let [page (get-page)]
     (.goto page "chrome://extensions")
     (.evaluate page enable-extension id)
     (.evaluate page script)))
 
 (defn listen
   [id]
-  (promesa/let [browser (.connectOverCDP chromium (str "http://localhost:" remote-debugging-port))
-                page (-> browser
-                         .contexts
-                         first
-                         .newPage)]
+  (promesa/let [page (get-page)]
     (.addInitScript page (clj->js {:path init-path}))
     (.goto page (get-manifest-url id))))
 

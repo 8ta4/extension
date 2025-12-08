@@ -48,6 +48,13 @@
        true
        (catch js/Error _ false)))
 
+(defn wait-for-browser-exit
+  [browser]
+  (promesa/loop []
+    (when (browser-running? browser)
+      (promesa/delay 1000)
+      (promesa/recur))))
+
 (def temp-directory
   (tmpdir))
 

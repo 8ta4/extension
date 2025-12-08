@@ -29,6 +29,7 @@
   # services.postgres.enable = true;
 
   # https://devenv.sh/scripts/
+  scripts.extension.exec = "node main.js $@";
   scripts.hello.exec = ''
     echo hello from $GREET
   '';

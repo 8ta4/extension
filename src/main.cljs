@@ -92,14 +92,20 @@
   [id]
   (js/chrome.management.setEnabled id true))
 
+(defn connect-to-browser
+  []
+  (promesa/loop []
+    (promesa/catch (.connectOverCDP chromium (str "http://localhost:" remote-debugging-port))
+                   (fn [_]
+                     (promesa/delay 1000)
+                     (promesa/recur)))))
+
 (defn get-page
   []
-  (promesa/->> remote-debugging-port
-               (str "http://localhost:")
-               (.connectOverCDP chromium)
-               .contexts
-               first
-               .newPage))
+  (promesa/-> (connect-to-browser)
+              .contexts
+              first
+              .newPage))
 
 (defn install-extension-in-browser
   [id script]

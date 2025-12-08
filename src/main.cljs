@@ -25,14 +25,14 @@
   (join (toString) "preferences" (str browser ".json")))
 
 (defn get-preference-target-path
-  [browser extension-id]
-  (join (browser-external-extension-paths browser) (str extension-id ".json")))
+  [browser id]
+  (join (browser-external-extension-paths browser) (str id ".json")))
 
 (defn install-extension-preference-file
-  [browser extension-id]
-  (println (str "Installing " extension-id " for " browser))
-  (make-parents (get-preference-target-path browser extension-id))
-  (cpSync (get-preference-source-path browser) (get-preference-target-path browser extension-id)))
+  [browser id]
+  (println (str "Installing " id " for " browser))
+  (make-parents (get-preference-target-path browser id))
+  (cpSync (get-preference-source-path browser) (get-preference-target-path browser id)))
 
 (def browser-app-names
   {"arc" "Arc"

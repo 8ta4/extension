@@ -3,6 +3,7 @@
    [app-root-path :refer [toString]]
    [child_process :refer [execSync]]
    [cljs-node-io.core :refer [make-parents slurp]]
+   [clojure.edn :refer [read-string]]
    [core :refer [port]]
    [fs :refer [cpSync mkdtempSync renameSync rmSync]]
    [os :refer [homedir tmpdir]]
@@ -28,7 +29,7 @@
 
 (defn install-extension-preference-file
   [browser extension-id]
-  (js/console.log (str "Installing " extension-id " for " browser))
+  (println (str "Installing " extension-id " for " browser))
   (make-parents (get-preference-target-path browser extension-id))
   (cpSync (get-preference-source-path browser) (get-preference-target-path browser extension-id)))
 
@@ -151,7 +152,12 @@
 (defn listen
   [browser]
   (relaunch-browser browser)
-  (WebSocketServer. (clj->js {:port port}))
+  (.on (WebSocketServer. (clj->js {:port port}))
+       "connection"
+       (fn [socket]
+         (.on socket "message"
+              (fn [message]
+                (println (read-string (.toString message)))))))
   (promesa/let [extensions (get-extensions)]
     (run! (comp listen-extension :id) (js->clj extensions :keywordize-keys true))))
 

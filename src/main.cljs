@@ -86,10 +86,19 @@
                          .contexts
                          first
                          .newPage)]
-    (.addInitScript page (clj->js {:path init-path}))
     (.goto page "chrome://extensions")
     (.evaluate page enable-extension id)
     (.evaluate page script)))
+
+(defn listen
+  [id]
+  (promesa/let [browser (.connectOverCDP chromium (str "http://localhost:" remote-debugging-port))
+                page (-> browser
+                         .contexts
+                         first
+                         .newPage)]
+    (.addInitScript page (clj->js {:path init-path}))
+    (.goto page (get-manifest-url id))))
 
 (defn install
   [{:keys [browser id script]}]
@@ -103,4 +112,5 @@
                         :id (nth args 2)
                         :script (if (> (count args) 3)
                                   (slurp (nth args 3))
-                                  "console.log('No script provided')")})))
+                                  "console.log('No script provided')")})
+    "listen" (listen (second args))))

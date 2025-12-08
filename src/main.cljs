@@ -150,13 +150,20 @@
     (.goto page (get-manifest-url id))
     (.evaluate page (slurp init-path))))
 
+(defn handle-message
+  [message]
+  (let [{:keys [url area-name changes]} (read-string (.toString message))]
+    (println url)
+    (run! (fn [[k v]]
+            (println (str "chrome.storage." area-name ".set({\"" (name k) "\": " (js/JSON.stringify (clj->js (:newValue v))) "});")))
+          changes)))
+
+(defn handle-connection
+  [socket]
+  (.on socket "message" handle-message))
+
 (defstate server
-  :start (.on (WebSocketServer. (clj->js {:port port}))
-              "connection"
-              (fn [socket]
-                (.on socket "message"
-                     (fn [message]
-                       (println (read-string (.toString message)))))))
+  :start (.on (WebSocketServer. (clj->js {:port port})) "connection" handle-connection)
   :stop (.close server))
 
 (defn listen

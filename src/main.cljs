@@ -142,7 +142,9 @@
 
 (defn listen
   [browser]
-  (relaunch-browser browser))
+  (relaunch-browser browser)
+  (promesa/let [extensions (get-extensions)]
+    (run! (comp listen-extension :id) (js->clj extensions :keywordize-keys true))))
 
 (defn main
   [& args]

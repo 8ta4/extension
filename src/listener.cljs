@@ -1,7 +1,5 @@
-(ns listener)
-
-(def port
-  8080)
+(ns listener
+  (:require [core :refer [port]]))
 
 (defn init
   []

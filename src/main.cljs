@@ -3,11 +3,13 @@
    [app-root-path :refer [toString]]
    [child_process :refer [execSync]]
    [cljs-node-io.core :refer [make-parents slurp]]
+   [core :refer [port]]
    [fs :refer [cpSync mkdtempSync renameSync rmSync]]
    [os :refer [homedir tmpdir]]
    [path :refer [join]]
    [playwright :refer [chromium]]
-   [promesa.core :as promesa]))
+   [promesa.core :as promesa]
+   [ws :refer [WebSocketServer]]))
 
 (def browser-external-extension-paths
   {"arc" (join (homedir) "Library/Application Support/Arc/User Data/External Extensions")
@@ -149,6 +151,7 @@
 (defn listen
   [browser]
   (relaunch-browser browser)
+  (WebSocketServer. (clj->js {:port port}))
   (promesa/let [extensions (get-extensions)]
     (run! (comp listen-extension :id) (js->clj extensions :keywordize-keys true))))
 

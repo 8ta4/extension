@@ -143,8 +143,8 @@
 (defn listen-extension
   [id]
   (promesa/let [page (get-page)]
-    (.addInitScript page (clj->js {:path init-path}))
-    (.goto page (get-manifest-url id))))
+    (.goto page (get-manifest-url id))
+    (.evaluate page (slurp init-path))))
 
 (defn listen
   [browser]

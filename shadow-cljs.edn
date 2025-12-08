@@ -7,8 +7,9 @@
   [funcool/promesa "11.0.678"]]
 
  :builds
- {:init {:target :browser
-         :modules {:init {}}}
+ {:listener {:devtools {:use-document-host false}
+             :target :browser
+             :modules {:init {:init-fn listener/init}}}
   :main {:target :node-script
          :main main/main
          :output-to "main.js"}}}

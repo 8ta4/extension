@@ -39,17 +39,15 @@
   [browser]
   (str "osascript -e 'quit app \"" (browser-app-names browser) "\"'"))
 
-(def quit-browser
-  (comp execSync get-quit-command))
-
 (defn browser-running?
   [browser]
   (try (execSync (str "pgrep -x '" (browser-app-names browser) "'"))
        true
        (catch js/Error _ false)))
 
-(defn wait-for-browser-exit
+(defn quit-browser
   [browser]
+  (execSync (get-quit-command browser))
   (promesa/loop []
     (when (browser-running? browser)
       (promesa/delay 1000)
@@ -119,8 +117,7 @@
 
 (defn relaunch-browser
   [browser]
-  (quit-browser browser)
-  (promesa/do (wait-for-browser-exit browser)
+  (promesa/do (quit-browser browser)
               (clone-user-data browser)
               (launch-browser browser)))
 

@@ -114,21 +114,29 @@
     (.evaluate page enable-extension id)
     (.evaluate page script)))
 
-(defn listen
+(defn relaunch-browser
+  [browser]
+  (quit-browser browser)
+  (promesa/do (wait-for-browser-exit browser)
+              (clone-user-data browser)
+              (launch-browser browser)))
+
+(defn install
+  [{:keys [browser id script]}]
+  (install-extension-preference-file browser id)
+  (promesa/do (relaunch-browser browser)
+              (install-extension-in-browser id script)
+              (quit-browser browser)))
+
+(defn listen-extension
   [id]
   (promesa/let [page (get-page)]
     (.addInitScript page (clj->js {:path init-path}))
     (.goto page (get-manifest-url id))))
 
-(defn install
-  [{:keys [browser id script]}]
-  (install-extension-preference-file browser id)
-  (quit-browser browser)
-  (promesa/do (wait-for-browser-exit browser)
-              (clone-user-data browser)
-              (launch-browser browser)
-              (install-extension-in-browser id script)
-              (quit-browser browser)))
+(defn listen
+  [browser]
+  (relaunch-browser browser))
 
 (defn main
   [& args]

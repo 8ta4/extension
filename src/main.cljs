@@ -42,6 +42,12 @@
 (def quit-browser
   (comp execSync get-quit-command))
 
+(defn browser-running?
+  [browser]
+  (try (execSync (str "pgrep -x '" (browser-app-names browser) "'"))
+       true
+       (catch js/Error _ false)))
+
 (def temp-directory
   (tmpdir))
 

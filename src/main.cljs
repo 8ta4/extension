@@ -107,10 +107,13 @@
               first
               .newPage))
 
+(def extensions-url
+  "chrome://extensions")
+
 (defn install-extension-in-browser
   [id script]
   (promesa/let [page (get-page)]
-    (.goto page "chrome://extensions")
+    (.goto page extensions-url)
     (.evaluate page enable-extension id)
     (.evaluate page script)))
 
@@ -131,7 +134,7 @@
 (defn get-extensions
   []
   (promesa/let [page (get-page)]
-    (.goto page "chrome://extensions")
+    (.goto page extensions-url)
     (.evaluate page #(js/chrome.management.getAll))))
 
 (defn listen-extension

@@ -168,6 +168,9 @@
 
 (defn listen
   [browser]
+  (println (str "Listening for changes in extensions for " browser))
+  (println (str "Please manually quit " browser " when you're done listening for changes. "
+                "Not closing " browser " might expose the remote debugging port which is a potential security risk."))
   (relaunch-browser browser)
   (start)
   (promesa/let [extensions (get-extensions)]

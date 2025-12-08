@@ -3,7 +3,7 @@
    [app-root-path :refer [toString]]
    [child_process :refer [execSync]]
    [cljs-node-io.core :refer [make-parents slurp]]
-   [fs :refer [cpSync mkdtempSync]]
+   [fs :refer [cpSync mkdtempSync renameSync rmSync]]
    [os :refer [homedir tmpdir]]
    [path :refer [join]]
    [playwright :refer [chromium]]
@@ -39,8 +39,19 @@
   [browser]
   (str "osascript -e 'quit app \"" (browser-app-names browser) "\"'"))
 
-(def quit-browser
-  (comp execSync get-quit-command))
+(defn browser-running?
+  [browser]
+  (try (execSync (str "pgrep -x '" (browser-app-names browser) "'"))
+       true
+       (catch js/Error _ false)))
+
+(defn quit-browser
+  [browser]
+  (execSync (get-quit-command browser))
+  (promesa/loop []
+    (when (browser-running? browser)
+      (promesa/delay 1000)
+      (promesa/recur))))
 
 (def temp-directory
   (tmpdir))
@@ -54,9 +65,14 @@
    "chrome" (join (homedir) "Library/Application Support/Google/Chrome")
    "edge" (join (homedir) "Library/Application Support/Microsoft Edge")})
 
-(defn clone-user-data
+(defn stage-user-data
   [browser]
   (cpSync (browser-user-data-paths browser) app-temp-directory (clj->js {:recursive true})))
+
+(defn commit-user-data
+  [browser]
+  (rmSync (browser-user-data-paths browser) (clj->js {:recursive true}))
+  (renameSync app-temp-directory (browser-user-data-paths browser) (clj->js {:recursive true})))
 
 (def remote-debugging-port
   "9222")
@@ -79,32 +95,62 @@
   [id]
   (js/chrome.management.setEnabled id true))
 
+(defn connect-to-browser
+  []
+  (promesa/loop []
+    (promesa/catch (.connectOverCDP chromium (str "http://localhost:" remote-debugging-port))
+                   (fn [_]
+                     (promesa/delay 1000)
+                     (promesa/recur)))))
+
 (defn get-page
   []
-  (promesa/->> remote-debugging-port
-               (str "http://localhost:")
-               (.connectOverCDP chromium)
-               .contexts
-               first
-               .newPage))
+  (promesa/-> (connect-to-browser)
+              .contexts
+              first
+              .newPage))
+
+(def extensions-url
+  "chrome://extensions")
 
 (defn install-extension-in-browser
   [id script]
   (promesa/let [page (get-page)]
-    (.goto page "chrome://extensions")
+    (.goto page extensions-url)
     (.evaluate page enable-extension id)
     (.evaluate page script)))
 
-(defn listen
+(defn relaunch-browser
+  [browser]
+  (promesa/do (quit-browser browser)
+              (stage-user-data browser)
+              (launch-browser browser)))
+
+(defn install
+  [{:keys [browser id script]}]
+  (install-extension-preference-file browser id)
+  (promesa/do (relaunch-browser browser)
+              (install-extension-in-browser id script)
+              (quit-browser browser)
+              (commit-user-data browser)))
+
+(defn get-extensions
+  []
+  (promesa/let [page (get-page)]
+    (.goto page extensions-url)
+    (.evaluate page #(js/chrome.management.getAll))))
+
+(defn listen-extension
   [id]
   (promesa/let [page (get-page)]
     (.addInitScript page (clj->js {:path init-path}))
     (.goto page (get-manifest-url id))))
 
-(defn install
-  [{:keys [browser id script]}]
-  (install-extension-preference-file browser id)
-  (install-extension-in-browser id script))
+(defn listen
+  [browser]
+  (relaunch-browser browser)
+  (promesa/let [extensions (get-extensions)]
+    (run! (comp listen-extension :id) (js->clj extensions :keywordize-keys true))))
 
 (defn main
   [& args]

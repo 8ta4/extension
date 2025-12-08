@@ -95,10 +95,6 @@
 (def init-path
   (join (toString) "public/js/init.js"))
 
-(defn enable-extension
-  [id]
-  (js/chrome.management.setEnabled id true))
-
 (defn connect-to-browser
   []
   (promesa/loop []
@@ -117,12 +113,17 @@
 (def extensions-url
   "chrome://extensions")
 
-(defn install-extension-in-browser
-  [id script]
+(defn enable-extension
+  [id]
   (promesa/let [page (get-page)]
     (.goto page extensions-url)
-    (.evaluate page enable-extension id)
-    (.evaluate page script)))
+    (.evaluate page #(js/chrome.management.setEnabled % true) id)))
+
+(defn run-in-page
+  [url code]
+  (promesa/let [page (get-page)]
+    (.goto page url)
+    (.evaluate page code)))
 
 (defn relaunch-browser
   [browser]
@@ -134,21 +135,11 @@
   [{:keys [browser id script]}]
   (install-extension-preference-file browser id)
   (promesa/do (relaunch-browser browser)
-              (install-extension-in-browser id script)
+              (enable-extension id)
+              (when script
+                (run-in-page (get-manifest-url id) (slurp script)))
               (quit-browser browser)
               (commit-user-data browser)))
-
-(defn get-extensions
-  []
-  (promesa/let [page (get-page)]
-    (.goto page extensions-url)
-    (.evaluate page #(js/chrome.management.getAll))))
-
-(defn listen-extension
-  [id]
-  (promesa/let [page (get-page)]
-    (.goto page (get-manifest-url id))
-    (.evaluate page (slurp init-path))))
 
 (defn handle-message
   [message]
@@ -166,6 +157,10 @@
   :start (.on (WebSocketServer. (clj->js {:port port})) "connection" handle-connection)
   :stop (.close server))
 
+(defn inject-listener
+  [id]
+  (run-in-page (get-manifest-url id) (slurp init-path)))
+
 (defn listen
   [browser]
   (println (str "Listening for changes in extensions for " browser))
@@ -173,8 +168,8 @@
                 "Not closing " browser " might expose the remote debugging port which is a potential security risk."))
   (relaunch-browser browser)
   (start)
-  (promesa/let [extensions (get-extensions)]
-    (run! (comp listen-extension :id) (js->clj extensions :keywordize-keys true))))
+  (promesa/let [extensions (run-in-page extensions-url #(js/chrome.management.getAll))]
+    (run! (comp inject-listener :id) (js->clj extensions :keywordize-keys true))))
 
 (defn main
   [& args]
@@ -182,6 +177,6 @@
     "install" (install {:browser (second args)
                         :id (nth args 2)
                         :script (if (> (count args) 3)
-                                  (slurp (nth args 3))
-                                  "console.log('No script provided')")})
+                                  (nth args 3)
+                                  nil)})
     "listen" (listen (second args))))

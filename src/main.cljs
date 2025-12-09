@@ -30,7 +30,6 @@
 
 (defn install-extension-preference-file
   [browser id]
-  (println (str "Installing " id " for " browser))
   (make-parents (get-preference-target-path browser id))
   (cpSync (get-preference-source-path browser) (get-preference-target-path browser id)))
 
@@ -73,11 +72,6 @@
   [browser]
   (cpSync (browser-user-data-paths browser) app-temp-directory (clj->js {:recursive true})))
 
-(defn commit-user-data
-  [browser]
-  (rmSync (browser-user-data-paths browser) (clj->js {:recursive true}))
-  (renameSync app-temp-directory (browser-user-data-paths browser) (clj->js {:recursive true})))
-
 (def remote-debugging-port
   "9222")
 
@@ -88,9 +82,11 @@
 (def launch-browser
   (comp execSync get-launch-command))
 
-(defn get-manifest-url
-  [id]
-  (str "chrome-extension://" id "/manifest.json"))
+(defn relaunch-browser
+  [browser]
+  (promesa/do (quit-browser browser)
+              (stage-user-data browser)
+              (launch-browser browser)))
 
 (def init-path
   (join (toString) "public/js/init.js"))
@@ -119,24 +115,29 @@
     (.goto page extensions-url)
     (.evaluate page #(js/chrome.management.setEnabled % true) id)))
 
+(defn get-manifest-url
+  [id]
+  (str "chrome-extension://" id "/manifest.json"))
+
 (defn run-in-page
   [url code]
   (promesa/let [page (get-page)]
     (.goto page url)
     (.evaluate page code)))
 
-(defn relaunch-browser
+(defn commit-user-data
   [browser]
-  (promesa/do (quit-browser browser)
-              (stage-user-data browser)
-              (launch-browser browser)))
+  (rmSync (browser-user-data-paths browser) (clj->js {:recursive true}))
+  (renameSync app-temp-directory (browser-user-data-paths browser) (clj->js {:recursive true})))
 
 (defn install
   [{:keys [browser id script]}]
+  (println (str "Installing extension " id " for " browser (when script (str " with " script))))
   (install-extension-preference-file browser id)
   (promesa/do (relaunch-browser browser)
               (enable-extension id)
               (when script
+                (println (slurp script))
                 (run-in-page (get-manifest-url id) (slurp script)))
               (quit-browser browser)
               (commit-user-data browser)))

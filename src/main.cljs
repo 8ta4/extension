@@ -30,7 +30,6 @@
 
 (defn install-extension-preference-file
   [browser id]
-  (println (str "Installing " id " for " browser))
   (make-parents (get-preference-target-path browser id))
   (cpSync (get-preference-source-path browser) (get-preference-target-path browser id)))
 
@@ -133,10 +132,12 @@
 
 (defn install
   [{:keys [browser id script]}]
+  (println (str "Installing extension " id " for " browser (when script (str " with " script))))
   (install-extension-preference-file browser id)
   (promesa/do (relaunch-browser browser)
               (enable-extension id)
               (when script
+                (println (slurp script))
                 (run-in-page (get-manifest-url id) (slurp script)))
               (quit-browser browser)
               (commit-user-data browser)))

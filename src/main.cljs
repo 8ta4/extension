@@ -91,17 +91,22 @@
 (def init-path
   (join (toString) "public/js/init.js"))
 
-(defn connect-to-browser
-  []
+(defn retry-until-successful
+  [f]
   (promesa/loop []
-    (promesa/catch (.connectOverCDP chromium (str "http://localhost:" remote-debugging-port))
+    (promesa/catch (f)
                    (fn [_]
                      (promesa/delay 1000)
                      (promesa/recur)))))
 
+(defn connect-to-browser
+  []
+  (.connectOverCDP chromium (str "http://localhost:" remote-debugging-port)))
+
 (defn get-page
   []
-  (promesa/-> (connect-to-browser)
+  (promesa/-> connect-to-browser
+              retry-until-successful
               .contexts
               first
               .newPage))
@@ -113,7 +118,8 @@
   [id]
   (promesa/let [page (get-page)]
     (.goto page extensions-url)
-    (.evaluate page #(js/chrome.management.setEnabled % true) id)))
+    (retry-until-successful (fn []
+                              (.evaluate page #(js/chrome.management.setEnabled % true) id)))))
 
 (defn get-manifest-url
   [id]

@@ -3,9 +3,14 @@
  ["src"]
 
  :dependencies
- [[com.github.pkpkpk/cljs-node-io "2.0.339"]]
+ [[com.github.pkpkpk/cljs-node-io "2.0.339"]
+  [funcool/promesa "11.0.678"]
+  [mount "0.1.23"]]
 
  :builds
- {:main {:target :node-script
+ {:listener {:devtools {:use-document-host false}
+             :target :browser
+             :modules {:init {:init-fn listener/init}}}
+  :main {:target :node-script
          :main main/main
          :output-to "main.js"}}}

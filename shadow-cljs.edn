@@ -11,6 +11,7 @@
  {:listener {:devtools {:use-document-host false}
              :target :browser
              :modules {:init {:init-fn listener/init}}}
-  :main {:target :node-script
+  :main {:compiler-options {:optimizations :simple}
+         :target :node-script
          :main main/main
          :output-to "main.js"}}}

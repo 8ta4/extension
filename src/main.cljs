@@ -70,6 +70,7 @@
 
 (defn stage-user-data
   [browser]
+; Symlinking allows the browser to start but prevents it from using the default profile data.
   (cpSync (browser-user-data-paths browser) app-temp-directory (clj->js {:recursive true})))
 
 (def remote-debugging-port

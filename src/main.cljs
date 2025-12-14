@@ -5,7 +5,7 @@
    [cljs-node-io.core :refer [make-parents slurp]]
    [clojure.edn :refer [read-string]]
    [core :refer [port]]
-   [fs :refer [cpSync mkdtempSync renameSync rmSync]]
+   [fs :refer [cpSync mkdtempSync symlinkSync]]
    [mount.core :refer [defstate start]]
    [os :refer [homedir tmpdir]]
    [path :refer [join]]
@@ -60,17 +60,13 @@
   (tmpdir))
 
 (def app-temp-directory
-  (mkdtempSync (join temp-directory "extension-")))
+  (join temp-directory (str "extension-" (random-uuid))))
 
 (def browser-user-data-paths
   {"arc" (join (homedir) "Library/Application Support/Arc/User Data")
 ; https://chromium.googlesource.com/chromium/src/+/main/docs/user_data_dir.md#:~:text=%5BChrome%5D%20~/Library/Application%20Support/Google/Chrome
    "chrome" (join (homedir) "Library/Application Support/Google/Chrome")
    "edge" (join (homedir) "Library/Application Support/Microsoft Edge")})
-
-(defn stage-user-data
-  [browser]
-  (cpSync (browser-user-data-paths browser) app-temp-directory (clj->js {:recursive true})))
 
 (def remote-debugging-port
   "9222")
@@ -85,7 +81,7 @@
 (defn relaunch-browser
   [browser]
   (promesa/do (quit-browser browser)
-              (stage-user-data browser)
+              (symlinkSync app-temp-directory (browser-user-data-paths browser))
               (launch-browser browser)))
 
 (def init-path
@@ -131,11 +127,6 @@
     (.goto page url)
     (.evaluate page code)))
 
-(defn commit-user-data
-  [browser]
-  (rmSync (browser-user-data-paths browser) (clj->js {:recursive true}))
-  (renameSync app-temp-directory (browser-user-data-paths browser) (clj->js {:recursive true})))
-
 (defn install
   [{:keys [browser id script]}]
   (println (str "Installing extension " id " for " browser (when script (str " with " script))))
@@ -145,8 +136,7 @@
               (when script
                 (println (slurp script))
                 (run-in-page (get-manifest-url id) (slurp script)))
-              (quit-browser browser)
-              (commit-user-data browser)))
+              (quit-browser browser)))
 
 (defn handle-message
   [message]

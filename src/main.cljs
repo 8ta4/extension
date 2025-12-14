@@ -70,6 +70,7 @@
 
 (defn stage-user-data
   [browser]
+; Symlinking allows the browser to start but prevents it from using the default profile data.
   (cpSync (browser-user-data-paths browser) app-temp-directory (clj->js {:recursive true})))
 
 (def remote-debugging-port
@@ -77,6 +78,7 @@
 
 (defn get-launch-command
   [browser]
+; https://developer.chrome.com/blog/remote-debugging-port#:~:text=Therefore%2C%20from%20Chrome,non%2Dstandard%20directory.
   (str "open -a '" (browser-app-names browser) "' --args --remote-debugging-port=" remote-debugging-port " --user-data-dir=" app-temp-directory))
 
 (def launch-browser
